@@ -20,7 +20,8 @@ export async function createOrUpdateLog(data: {
       sales: data.sales,
       tasks: data.tasks,
       status: score >= 70 ? 'pass' : 'fail',
-    }, { onConflict: 'date', returning: 'representation' })
+    }, { onConflict: 'date' })
+    .select()
     .single();
   if (error) throw error;
   return { ...log, saved: true } as DailyLog;
