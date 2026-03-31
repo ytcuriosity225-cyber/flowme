@@ -9,8 +9,6 @@ import {
   DEFAULT_TASKS,
 } from "@/types";
 import {
-  getStoredLogs,
-  setStoredLogs,
   getStoredSettings,
   setStoredSettings,
   formatDate,
@@ -33,11 +31,12 @@ interface AppContextType {
   todayLog: DayLog;
   updateTodayTasks: (tasks: DayTasks) => void;
   updateTodaySales: (sales: number) => void;
-  saveDay: () => void;
+  saveDay: () => Promise<void>;
 
   // Computed
   totalSales: number;
   todayScore: number;
+  isSaving: boolean;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -49,6 +48,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [todayTasks, setTodayTasks] = useState<DayTasks>({ ...DEFAULT_TASKS });
   const [todaySales, setTodaySales] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Load data from API and settings
   useEffect(() => {
@@ -57,28 +57,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch('/api/logs');
         if (!res.ok) throw new Error('Failed to fetch logs');
         const data = await res.json();
-        setLogs(data);
+        
+        // Map data from API to AppContext types if needed
+        const mappedLogs: DayLog[] = (data || []).map((l: any) => ({
+          log_date: l.log_date,
+          score: l.score,
+          sales: l.sales,
+          tasks: l.tasks,
+          saved: true,
+        }));
+        
+        setLogs(mappedLogs);
+        
         // Load today's data if exists
         const today = formatDate(new Date());
-        const todayEntry = data.find((l: any) => l.date === today);
+        const todayEntry = mappedLogs.find((l) => l.log_date === today);
         if (todayEntry) {
           setTodayTasks(todayEntry.tasks);
           setTodaySales(todayEntry.sales);
         }
       } catch (e) {
-        console.error(e);
+        console.error('Error fetching logs:', e);
+      } finally {
+        setIsLoaded(true);
       }
     };
+    
     fetchLogs();
     const storedSettings = getStoredSettings();
     if (storedSettings) setSettings(storedSettings);
-    setIsLoaded(true);
   }, []);
-
-  // Persist logs
-  useEffect(() => {
-    if (isLoaded) setStoredLogs(logs);
-  }, [logs, isLoaded]);
 
   // Persist settings
   useEffect(() => {
@@ -88,19 +96,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const todayScore = calculateScore(todayTasks);
 
   const todayLog: DayLog = {
-    date: formatDate(new Date()),
+    log_date: formatDate(new Date()),
     score: todayScore,
     sales: todaySales,
     tasks: todayTasks,
-    saved: logs.some((l) => l.date === formatDate(new Date()) && l.saved),
+    saved: logs.some((l) => l.log_date === formatDate(new Date())),
   };
 
-  const totalSales = logs.reduce((sum, l) => sum + l.sales, 0) +
-    (logs.some((l) => l.date === formatDate(new Date())) ? 0 : todaySales);
-
   const computedTotalSales = logs.reduce((sum, log) => {
-    if (log.date === formatDate(new Date())) return sum;
-    return sum + log.sales;
+    if (log.log_date === formatDate(new Date())) return sum;
+    return sum + (log.sales || 0);
   }, 0) + todaySales;
 
   const unlock = useCallback(
@@ -120,11 +125,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setSettings((prev) => ({ ...prev, ...partial }));
   }, []);
 
-  const resetAllData = useCallback(() => {
+  const resetAllData = useCallback(async () => {
+    // Optionally call reset endpoint in production
     setLogs([]);
     setTodayTasks({ ...DEFAULT_TASKS });
     setTodaySales(0);
-    localStorage.removeItem("flowme_sales_data");
   }, []);
 
   const updateTodayTasks = useCallback((tasks: DayTasks) => {
@@ -135,26 +140,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTodaySales(sales);
   }, []);
 
-  const saveDay = useCallback(() => {
-    const today = formatDate(new Date());
+  const saveDay = useCallback(async () => {
+    setIsSaving(true);
+    const todayStr = formatDate(new Date());
     const score = calculateScore(todayTasks);
-    const newLog: DayLog = {
-      date: today,
-      score,
-      sales: todaySales,
-      tasks: { ...todayTasks },
-      saved: true,
-    };
+    
+    try {
+      const response = await fetch('/api/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: todayStr,
+          sales: todaySales,
+          tasks: todayTasks,
+        }),
+      });
 
-    setLogs((prev) => {
-      const existing = prev.findIndex((l) => l.date === today);
-      if (existing >= 0) {
-        const updated = [...prev];
-        updated[existing] = newLog;
-        return updated;
-      }
-      return [...prev, newLog];
-    });
+      if (!response.ok) throw new Error('Failed to save log');
+      
+      const savedLog = await response.json();
+      
+      const newDayLog: DayLog = {
+        log_date: todayStr,
+        score,
+        sales: todaySales,
+        tasks: { ...todayTasks },
+        saved: true,
+      };
+
+      setLogs((prev) => {
+        const existing = prev.findIndex((l) => l.log_date === todayStr);
+        if (existing >= 0) {
+          const updated = [...prev];
+          updated[existing] = newDayLog;
+          return updated;
+        }
+        return [...prev, newDayLog];
+      });
+
+    } catch (error) {
+      console.error('Error saving day log:', error);
+      alert('Error saving data to Supabase. Check console.');
+    } finally {
+      setIsSaving(false);
+    }
   }, [todayTasks, todaySales]);
 
   if (!isLoaded) {
@@ -181,6 +210,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         saveDay,
         totalSales: computedTotalSales,
         todayScore,
+        isSaving,
       }}
     >
       {children}

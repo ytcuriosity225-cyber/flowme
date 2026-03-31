@@ -1,22 +1,6 @@
-import { DayLog, DayTasks, TASK_DEFINITIONS, TaskKey } from "@/types";
+import { DayTasks, TASK_DEFINITIONS, TaskKey } from "@/types";
 
-const STORAGE_KEY = "flowme_sales_data";
 const SETTINGS_KEY = "flowme_sales_settings";
-
-export function getStoredLogs(): DayLog[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    return [];
-  }
-}
-
-export function setStoredLogs(logs: DayLog[]): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
-}
 
 export function getStoredSettings() {
   if (typeof window === "undefined") return null;

@@ -1,33 +1,30 @@
 import { DailyLog } from '@/types/log';
-import { memoryStore } from '@/lib/store/memoryStore';
 
 /**
- * Compute average score over the last N days (or all logs if N not provided).
+ * Compute average score over a list of logs.
  */
-export function getAverageScore(lastNDays?: number): number {
-  const logs = memoryStore.getAllLogs();
+export function getAverageScore(logs: DailyLog[]): number {
   if (logs.length === 0) return 0;
-  const slice = lastNDays ? logs.slice(-lastNDays) : logs;
-  const total = slice.reduce((sum, l) => sum + l.score, 0);
-  return Math.round(total / slice.length);
+  const total = logs.reduce((sum, l) => sum + (l.score || 0), 0);
+  return Math.round(total / logs.length);
 }
 
 /** Return dates (as strings) where score < 70 */
-export function getFailDays(): string[] {
-  return memoryStore
-    .getAllLogs()
-    .filter((l) => l.score < 70)
-    .map((l) => l.date);
+export function getFailDays(logs: DailyLog[]): string[] {
+  return logs
+    .filter((l) => (l.score || 0) < 70)
+    .map((l) => l.log_date);
 }
 
 /**
- * Calculate the current streak of consecutive passing days (score >= 70) ending today.
+ * Calculate the current streak of consecutive passing days (score >= 70) ending with the latest log.
  */
-export function getStreak(): number {
-  const logs = memoryStore.getAllLogs().sort((a, b) => a.date.localeCompare(b.date));
+export function getStreak(logs: DailyLog[]): number {
+  if (logs.length === 0) return 0;
+  const sortedLogs = [...logs].sort((a, b) => a.log_date.localeCompare(b.log_date));
   let streak = 0;
-  for (let i = logs.length - 1; i >= 0; i--) {
-    if (logs[i].score >= 70) streak++;
+  for (let i = sortedLogs.length - 1; i >= 0; i--) {
+    if ((sortedLogs[i].score || 0) >= 70) streak++;
     else break;
   }
   return streak;
@@ -36,13 +33,12 @@ export function getStreak(): number {
 /**
  * Projection: (average daily sales) * remaining days of the month.
  */
-export function getProjection(): number {
-  const logs = memoryStore.getAllLogs();
+export function getProjection(logs: DailyLog[]): number {
   if (logs.length === 0) return 0;
-  const totalSales = logs.reduce((sum, l) => sum + l.sales, 0);
+  const totalSales = logs.reduce((sum, l) => sum + (l.sales || 0), 0);
   const avgSales = totalSales / logs.length;
   const today = new Date();
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
   const remaining = daysInMonth - today.getDate();
-  return Math.round(avgSales * remaining);
+  return Math.round(avgSales * (remaining > 0 ? remaining : 0));
 }

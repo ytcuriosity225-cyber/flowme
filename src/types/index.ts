@@ -12,7 +12,7 @@ export interface DayTasks {
 }
 
 export interface DayLog {
-  date: string; // YYYY-MM-DD
+  log_date: string; // YYYY-MM-DD
   score: number;
   sales: number;
   tasks: DayTasks;
