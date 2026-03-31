@@ -64,6 +64,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           score: l.score,
           sales: l.sales,
           tasks: l.tasks,
+          status: l.status || (l.score >= 70 ? "pass" : "fail"),
           saved: true,
         }));
         
@@ -100,6 +101,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     score: todayScore,
     sales: todaySales,
     tasks: todayTasks,
+    status: todayScore >= 70 ? "pass" : "fail",
     saved: logs.some((l) => l.log_date === formatDate(new Date())),
   };
 
@@ -165,6 +167,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         score,
         sales: todaySales,
         tasks: { ...todayTasks },
+        status: score >= 70 ? "pass" : "fail",
         saved: true,
       };
 

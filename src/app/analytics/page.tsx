@@ -11,7 +11,7 @@ export default function AnalyticsPage() {
   const stats = useMemo(() => {
     // Sort logs purely by date
     const sortedLogs = [...logs].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      (a, b) => new Date(a.log_date).getTime() - new Date(b.log_date).getTime()
     );
 
     let currentStreak = 0;

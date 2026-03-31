@@ -3,8 +3,8 @@ export interface DailyLog {
   log_date: string;
   score: number;
   sales: number;
-  tasks: any; // Using any for flexibility with JSONB, can be more specific later
-  status?: 'pass' | 'fail';
+  tasks: any;
+  status: string;
   created_at?: string;
   saved?: boolean;
 }

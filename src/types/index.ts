@@ -15,7 +15,8 @@ export interface DayLog {
   log_date: string; // YYYY-MM-DD
   score: number;
   sales: number;
-  tasks: DayTasks;
+  tasks: any;
+  status: string;
   saved: boolean;
 }
 
