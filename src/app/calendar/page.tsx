@@ -19,7 +19,7 @@ export default function CalendarPage() {
   const calendarDays = Array.from({ length: daysInMonth }, (_, i) => {
     const day = i + 1;
     const dateStr = `2026-04-${day.toString().padStart(2, "0")}`;
-    const log = logs.find((l) => l.date === dateStr);
+    const log = logs.find((l) => l.log_date === dateStr);
     return { day, dateStr, log };
   });
 
@@ -109,7 +109,7 @@ export default function CalendarPage() {
               <div className="space-y-8">
                  <div className="space-y-1">
                     <p className="text-text-dim text-xs font-black uppercase tracking-[0.2em]">Operational Summary</p>
-                    <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">{new Date(selectedDay.date + "T00:00:00").toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</h2>
+                    <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">{new Date(selectedDay.log_date + "T00:00:00").toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</h2>
                  </div>
 
                  <div className="grid grid-cols-2 gap-6">
