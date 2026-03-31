@@ -86,7 +86,7 @@ export default function CalendarPage() {
                 )}
                 {/* Visual indicator for pass/fail */}
                 {hasData && (
-                   <div className={`absolute top-4 right-4 w-2 h-2 rounded-full ${isPass ? "bg-green shadow-[0_0_10px_#22c55e]" : "bg-red shadow-[0_0_10px_#ef4444]"}`} />
+                  <div className={`absolute top-4 right-4 w-2 h-2 rounded-full ${isPass ? "bg-green shadow-[0_0_10px_#22c55e]" : "bg-red shadow-[0_0_10px_#ef4444]"}`} />
                 )}
               </button>
             );
@@ -97,59 +97,59 @@ export default function CalendarPage() {
       {/* Modal */}
       {selectedDay && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 backdrop-blur-sm bg-bg/80 animate-in fade-in duration-300">
-           <div className="bg-card border border-border w-full max-w-xl rounded-3xl p-10 shadow-2xl relative overflow-hidden">
-              <button 
-                onClick={() => setSelectedDay(null)}
-                className="absolute top-6 right-6 text-text-dim hover:text-white transition-colors"
-                title="Close modal"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-              </button>
+          <div className="bg-card border border-border w-full max-w-xl rounded-3xl p-10 shadow-2xl relative overflow-hidden">
+            <button
+              onClick={() => setSelectedDay(null)}
+              className="absolute top-6 right-6 text-text-dim hover:text-white transition-colors"
+              title="Close modal"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            </button>
 
-              <div className="space-y-8">
-                 <div className="space-y-1">
-                    <p className="text-text-dim text-xs font-black uppercase tracking-[0.2em]">Operational Summary</p>
-                    <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">{new Date(selectedDay.log_date + "T00:00:00").toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</h2>
-                 </div>
-
-                 <div className="grid grid-cols-2 gap-6">
-                    <div className="bg-bg border border-white/5 p-6 rounded-2xl">
-                       <span className="text-[10px] font-black text-text-dim uppercase tracking-[0.2em] block mb-2">Performance Index</span>
-                       <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-black text-white">{selectedDay.score}</span>
-                          <span className="text-text-dim font-bold">/ 100</span>
-                       </div>
-                       <p className={`mt-2 text-xs font-black uppercase tracking-[0.2em] ${selectedDay.score >= 70 ? "text-green" : "text-red"}`}>
-                          Result: {selectedDay.score >= 70 ? "Pass" : "Fail"}
-                       </p>
-                    </div>
-                    <div className="bg-bg border border-white/5 p-6 rounded-2xl">
-                       <span className="text-[10px] font-black text-text-dim uppercase tracking-[0.2em] block mb-2">Revenue Units</span>
-                       <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-black text-white">{selectedDay.sales}</span>
-                          <span className="text-text-dim font-bold">Sales</span>
-                       </div>
-                    </div>
-                 </div>
-
-                 <div className="space-y-4">
-                    <span className="text-[10px] font-black text-text-dim uppercase tracking-[0.2em] block">Completed Protocols</span>
-                    <div className="flex flex-wrap gap-2">
-                       {getCompletedTaskLabels(selectedDay.tasks).map(label => (
-                         <span key={label} className="bg-white/5 border border-white/5 rounded-lg px-4 py-2 text-[10px] font-black text-white uppercase tracking-wider">
-                           {label}
-                         </span>
-                       ))}
-                    </div>
-                 </div>
+            <div className="space-y-8">
+              <div className="space-y-1">
+                <p className="text-text-dim text-xs font-black uppercase tracking-[0.2em]">Operational Summary</p>
+                <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">{new Date(selectedDay.log_date + "T00:00:00").toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</h2>
               </div>
 
-              {/* Background detail */}
-              <div 
-                className="absolute -bottom-20 -right-20 w-80 h-80 opacity-20 blur-[100px] rounded-full"
-                style={{ backgroundColor: getScoreColor(selectedDay.score) }}
-              />
-           </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-bg border border-white/5 p-6 rounded-2xl">
+                  <span className="text-[10px] font-black text-text-dim uppercase tracking-[0.2em] block mb-2">Performance Index</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-black text-white">{selectedDay.score}</span>
+                    <span className="text-text-dim font-bold">/ 100</span>
+                  </div>
+                  <p className={`mt-2 text-xs font-black uppercase tracking-[0.2em] ${selectedDay.score >= 70 ? "text-green" : "text-red"}`}>
+                    Result: {selectedDay.score >= 70 ? "Pass" : "Fail"}
+                  </p>
+                </div>
+                <div className="bg-bg border border-white/5 p-6 rounded-2xl">
+                  <span className="text-[10px] font-black text-text-dim uppercase tracking-[0.2em] block mb-2">Revenue Units</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-black text-white">{selectedDay.sales}</span>
+                    <span className="text-text-dim font-bold">Sales</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <span className="text-[10px] font-black text-text-dim uppercase tracking-[0.2em] block">Completed Protocols</span>
+                <div className="flex flex-wrap gap-2">
+                  {getCompletedTaskLabels(selectedDay.tasks).map(label => (
+                    <span key={label} className="bg-white/5 border border-white/5 rounded-lg px-4 py-2 text-[10px] font-black text-white uppercase tracking-wider">
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Background detail */}
+            <div
+              className="absolute -bottom-20 -right-20 w-80 h-80 opacity-20 blur-[100px] rounded-full"
+              style={{ backgroundColor: getScoreColor(selectedDay.score) }}
+            />
+          </div>
         </div>
       )}
     </InternalLayout>
