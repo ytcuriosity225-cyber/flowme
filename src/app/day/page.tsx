@@ -2,6 +2,7 @@
 
 import { useApp } from "@/context/AppContext";
 import { InternalLayout } from "@/components/InternalLayout";
+import { AIAnalyst } from "@/components/AIAnalyst";
 import { getTasksByCategory, getScoreColor, getScoreLabel } from "@/lib/utils";
 import { TaskKey } from "@/types";
 import { useState, useEffect } from "react";
@@ -26,13 +27,6 @@ export default function DayExecution() {
   const handleSalesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value) || 0;
     updateTodaySales(val);
-    
-    // Automatically check "Got Sales" task if sales > 0
-    if (val > 0 && !todayLog.tasks.gotSales) {
-      updateTodayTasks({ ...todayLog.tasks, gotSales: true });
-    } else if (val === 0 && todayLog.tasks.gotSales) {
-      updateTodayTasks({ ...todayLog.tasks, gotSales: false });
-    }
   };
 
   const handleSave = () => {
@@ -52,10 +46,10 @@ export default function DayExecution() {
         <div className="border-b border-white/5 pb-8 flex justify-between items-end">
           <div className="space-y-1">
             <p className="text-text-dim text-xs font-black uppercase tracking-[0.2em]">
-              Operational Unit
+              High-Performance Workspace
             </p>
             <h1 className="text-3xl font-black text-white uppercase italic tracking-tighter">
-              Daily Execution
+              Daily Execution Protocol
             </h1>
           </div>
           <div className="text-right">
@@ -68,9 +62,12 @@ export default function DayExecution() {
           </div>
         </div>
 
+        {/* AI Analyst Widget */}
+        <AIAnalyst />
+
         <div className="grid grid-cols-1 gap-12 max-w-4xl">
-          {/* HIGH IMPACT */}
-          <Section title="High Impact Protocol" subtitle="60 Points Potential">
+          {/* HIGH IMPACT - BUSINESS & MARKETING */}
+          <Section title="Business & Marketing" subtitle="60 Points Potential" category="high">
             {highImpact.map((task) => (
               <div key={task.key} className="flex items-center justify-between p-4 bg-card border border-border rounded-xl group hover:border-text-dim transition-all">
                 <div className="flex items-center gap-4 flex-1">
@@ -82,9 +79,9 @@ export default function DayExecution() {
                       id={task.key}
                       className="peer h-6 w-6 opacity-0 absolute z-10 cursor-pointer"
                     />
-                    <div className={`h-6 w-6 border-2 rounded flex items-center justify-center transition-all ${todayLog.tasks[task.key] ? "bg-white border-white" : "border-white/10"}`}>
+                    <div className={`h-6 w-6 border-2 rounded flex items-center justify-center transition-all ${todayLog.tasks[task.key] ? "bg-accent border-accent" : "border-white/10"}`}>
                       {todayLog.tasks[task.key] && (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       )}
                     </div>
                   </div>
@@ -94,9 +91,9 @@ export default function DayExecution() {
                 </div>
                 
                 <div className="flex items-center gap-6">
-                  {task.key === "gotSales" && (
+                  {task.key === "salesCodOps" && (
                     <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-black text-text-dim uppercase tracking-widest">Quantity:</span>
+                      <span className="text-[10px] font-black text-text-dim uppercase tracking-widest">Sales Count:</span>
                       <input
                         type="number"
                         value={todayLog.sales || ""}
@@ -106,14 +103,14 @@ export default function DayExecution() {
                       />
                     </div>
                   )}
-                  <span className="text-[10px] font-black text-text-dim uppercase tracking-widest">+{task.weight} PTS</span>
+                  <span className="text-[10px] font-black text-accent uppercase tracking-widest">+{task.weight} PTS</span>
                 </div>
               </div>
             ))}
           </Section>
 
-          {/* MEDIUM IMPACT */}
-          <Section title="Baseline Operations" subtitle="28 Points Potential">
+          {/* MEDIUM IMPACT - TECH BEAST */}
+          <Section title="Tech Beast Development" subtitle="30 Points Potential" category="medium">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {mediumImpact.map((task) => (
                 <TaskCard
@@ -121,13 +118,14 @@ export default function DayExecution() {
                   task={task}
                   checked={todayLog.tasks[task.key]}
                   onToggle={() => handleToggleTask(task.key)}
+                  category="medium"
                 />
               ))}
             </div>
           </Section>
 
-          {/* LOW IMPACT */}
-          <Section title="Cognitive Maintenance" subtitle="12 Points Potential">
+          {/* LOW IMPACT - PERSONAL BRAND & GROWTH */}
+          <Section title="Personal Brand & Growth" subtitle="15 Points Potential" category="low">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {lowImpact.map((task) => (
                 <TaskCard
@@ -135,6 +133,7 @@ export default function DayExecution() {
                   task={task}
                   checked={todayLog.tasks[task.key]}
                   onToggle={() => handleToggleTask(task.key)}
+                  category="low"
                 />
               ))}
             </div>
@@ -193,11 +192,17 @@ export default function DayExecution() {
   );
 }
 
-function Section({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
+function Section({ title, subtitle, category, children }: { title: string; subtitle: string; category: "high" | "medium" | "low"; children: React.ReactNode }) {
+  const colors = {
+    high: "text-red",
+    medium: "text-green",
+    low: "text-blue"
+  };
+  
   return (
     <div className="space-y-6">
       <div className="flex items-baseline gap-4">
-        <h2 className="text-sm font-black text-white uppercase tracking-[0.2em]">{title}</h2>
+        <h2 className={`text-sm font-black ${colors[category]} uppercase tracking-[0.2em]`}>{title}</h2>
         <div className="flex-1 h-px bg-white/5" />
         <span className="text-[10px] font-bold text-text-dim uppercase tracking-widest italic">{subtitle}</span>
       </div>
@@ -208,16 +213,22 @@ function Section({ title, subtitle, children }: { title: string; subtitle: strin
   );
 }
 
-function TaskCard({ task, checked, onToggle }: { task: any; checked: boolean; onToggle: () => void }) {
+function TaskCard({ task, checked, onToggle, category }: { task: any; checked: boolean; onToggle: () => void; category: "high" | "medium" | "low" }) {
+  const colors = {
+    high: "border-red/30 hover:border-red/60",
+    medium: "border-green/30 hover:border-green/60",
+    low: "border-blue/30 hover:border-blue/60"
+  };
+  
   return (
     <div 
       onClick={onToggle}
-      className={`p-5 bg-card border border-border rounded-xl cursor-pointer hover:border-white/20 transition-all flex justify-between items-start group ${checked ? "bg-white/5" : ""}`}
+      className={`p-5 bg-card border rounded-xl cursor-pointer transition-all flex justify-between items-start group ${colors[category]} ${checked ? "bg-white/5" : ""}`}
     >
       <div className="flex gap-4">
-        <div className={`mt-1 h-4 w-4 border-2 rounded transition-all ${checked ? "bg-white border-white" : "border-white/10"}`}>
+        <div className={`mt-1 h-4 w-4 border-2 rounded transition-all ${checked ? "bg-accent border-accent" : "border-white/10"}`}>
           {checked && (
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           )}
         </div>
         <div className="space-y-1">
@@ -226,7 +237,7 @@ function TaskCard({ task, checked, onToggle }: { task: any; checked: boolean; on
           </span>
         </div>
       </div>
-      <span className="text-[9px] font-black text-text-dim uppercase tracking-widest">+{task.weight}</span>
+      <span className={`text-[9px] font-black uppercase tracking-widest ${category === 'high' ? 'text-red' : category === 'medium' ? 'text-green' : 'text-blue'}`}>+{task.weight}</span>
     </div>
   );
 }

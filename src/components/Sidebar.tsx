@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { label: "Execute", href: "/day", Icon: TargetIcon },
   { label: "Calendar", href: "/calendar", Icon: CalendarIcon },
   { label: "Analytics", href: "/analytics", Icon: AnalyticsIcon },
+  { label: "Roadmap", href: "/roadmap", Icon: RoadmapIcon },
   { label: "Settings", href: "/settings", Icon: SettingsIcon },
 ];
 
@@ -82,6 +83,11 @@ function CalendarIcon({ className }: { className?: string }) {
 function AnalyticsIcon({ className }: { className?: string }) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+  );
+}
+function RoadmapIcon({ className }: { className?: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3v18"/><path d="M8 9h8M8 15h8"/><circle cx="12" cy="3" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="21" r="1.5"/></svg>
   );
 }
 function SettingsIcon({ className }: { className?: string }) {

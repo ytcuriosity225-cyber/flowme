@@ -1,13 +1,13 @@
 export interface DayTasks {
-  runAds: boolean;
-  gotSales: boolean;
-  codCare: boolean;
-  clientFollowUp: boolean;
-  creativesWork: boolean;
-  objectionHandling: boolean;
-  landingPageWork: boolean;
-  systemCheck: boolean;
-  learning: boolean;
+  adOperations: boolean;
+  salesCodOps: boolean;
+  websiteCopyOptimization: boolean;
+  creativeProduction: boolean;
+  sheryiansCoding: boolean;
+  projectBuild: boolean;
+  codingLogicChallenge: boolean;
+  bookReading: boolean;
+  personalBrandContent: boolean;
   experienceJournal: boolean;
 }
 
@@ -23,6 +23,7 @@ export interface DayLog {
 export interface AppSettings {
   password: string;
   animationsEnabled: boolean;
+  nightOwlMode: boolean;
   startDate: string; // YYYY-MM-DD
   goalSales: number;
   goalDays: number;
@@ -38,37 +39,38 @@ export interface TaskDefinition {
 }
 
 export const TASK_DEFINITIONS: TaskDefinition[] = [
-  // HIGH IMPACT (15 pts each = 60)
-  { key: "runAds", label: "Run Ads", weight: 15, category: "high" },
-  { key: "gotSales", label: "Got Sales", weight: 15, category: "high" },
-  { key: "codCare", label: "COD Care", weight: 15, category: "high" },
-  { key: "clientFollowUp", label: "Client Follow-up", weight: 15, category: "high" },
-  // MEDIUM IMPACT (7 pts each = 28)
-  { key: "creativesWork", label: "Creatives Work", weight: 7, category: "medium" },
-  { key: "objectionHandling", label: "Objection Handling", weight: 7, category: "medium" },
-  { key: "landingPageWork", label: "Landing Page Work", weight: 7, category: "medium" },
-  { key: "systemCheck", label: "System Check", weight: 7, category: "medium" },
-  // LOW IMPACT (6 pts each = 12)
-  { key: "learning", label: "Learning", weight: 6, category: "low" },
-  { key: "experienceJournal", label: "Experience Journal", weight: 6, category: "low" },
+  // HIGH IMPACT - BUSINESS & MARKETING (15 pts each = 60)
+  { key: "adOperations", label: "Ad Operations (Run/Optimize)", weight: 15, category: "high" },
+  { key: "salesCodOps", label: "Sales & COD Care Operations", weight: 15, category: "high" },
+  { key: "websiteCopyOptimization", label: "Website Copy & Offer Optimization", weight: 15, category: "high" },
+  { key: "creativeProduction", label: "Creative Production (Weekly Assets)", weight: 15, category: "high" },
+  // MEDIUM IMPACT - TECH BEAST (10 pts each = 30)
+  { key: "sheryiansCoding", label: "Sheryians Coding Session (JS/Backend)", weight: 10, category: "medium" },
+  { key: "projectBuild", label: "Project Build (Social Media Limiter)", weight: 10, category: "medium" },
+  { key: "codingLogicChallenge", label: "Coding Logic Challenge (Problem Solving)", weight: 10, category: "medium" },
+  // LOW IMPACT - PERSONAL BRAND & GROWTH (5 pts each = 15)
+  { key: "bookReading", label: "Marketing Book Reading (Sell Like Crazy)", weight: 5, category: "low" },
+  { key: "personalBrandContent", label: "Personal Brand Content (Script/Shoot/Edit)", weight: 5, category: "low" },
+  { key: "experienceJournal", label: "Experience Journal & Daily Learning", weight: 5, category: "low" },
 ];
 
 export const DEFAULT_TASKS: DayTasks = {
-  runAds: false,
-  gotSales: false,
-  codCare: false,
-  clientFollowUp: false,
-  creativesWork: false,
-  objectionHandling: false,
-  landingPageWork: false,
-  systemCheck: false,
-  learning: false,
+  adOperations: false,
+  salesCodOps: false,
+  websiteCopyOptimization: false,
+  creativeProduction: false,
+  sheryiansCoding: false,
+  projectBuild: false,
+  codingLogicChallenge: false,
+  bookReading: false,
+  personalBrandContent: false,
   experienceJournal: false,
 };
 
 export const DEFAULT_SETTINGS: AppSettings = {
   password: "1234",
   animationsEnabled: true,
+  nightOwlMode: false,
   startDate: "2026-04-01",
   goalSales: 300,
   goalDays: 30,

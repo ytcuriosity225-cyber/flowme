@@ -12,6 +12,7 @@ export default function SettingsPage() {
   const [password, setPassword] = useState(settings.password);
   const [goalSales, setGoalSales] = useState(settings.goalSales.toString());
   const [goalDays, setGoalDays] = useState(settings.goalDays.toString());
+  const [nightOwlMode, setNightOwlMode] = useState(settings.nightOwlMode);
   const [isSaved, setIsSaved] = useState(false);
   const [showConfirmReset, setShowConfirmReset] = useState(false);
 
@@ -20,6 +21,7 @@ export default function SettingsPage() {
       password,
       goalSales: parseInt(goalSales) || 300,
       goalDays: parseInt(goalDays) || 30,
+      nightOwlMode,
     });
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
@@ -27,6 +29,12 @@ export default function SettingsPage() {
 
   const handleToggleAnimations = () => {
     updateSettings({ animationsEnabled: !settings.animationsEnabled });
+  };
+
+  const handleToggleNightOwl = () => {
+    const newMode = !nightOwlMode;
+    setNightOwlMode(newMode);
+    updateSettings({ nightOwlMode: newMode });
   };
 
   const handleReset = () => {
@@ -108,6 +116,19 @@ export default function SettingsPage() {
                   className={`w-14 h-8 rounded-full border-2 transition-colors relative ${settings.animationsEnabled ? "border-green bg-green/10" : "border-border bg-bg"}`}
                 >
                   <div className={`w-5 h-5 rounded-full absolute top-[4px] transition-transform ${settings.animationsEnabled ? "bg-green translate-x-[26px]" : "bg-text-dim translate-x-[4px]"}`} />
+                </button>
+             </div>
+
+             <div className="border-t border-white/5 pt-6 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-white tracking-widest uppercase">Night Owl Mode</p>
+                  <p className="text-xs text-text-dim uppercase tracking-widest mt-1">Neon purple accent colors</p>
+                </div>
+                <button 
+                  onClick={handleToggleNightOwl}
+                  className={`w-14 h-8 rounded-full border-2 transition-colors relative ${nightOwlMode ? "border-purple bg-purple/10" : "border-border bg-bg"}`}
+                >
+                  <div className={`w-5 h-5 rounded-full absolute top-[4px] transition-transform ${nightOwlMode ? "bg-purple translate-x-[26px]" : "bg-text-dim translate-x-[4px]"}`} />
                 </button>
              </div>
            </div>
