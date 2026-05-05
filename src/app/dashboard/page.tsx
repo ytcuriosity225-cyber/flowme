@@ -1,192 +1,126 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useApp } from "@/context/AppContext";
 import { InternalLayout } from "@/components/InternalLayout";
-import {
-  formatDate,
-  formatDisplayDate,
-  getDayNumber,
-  getProjection,
-  getScoreLabel,
-  getScoreStatus,
-} from "@/lib/utils";
 import gsap from "gsap";
 
 export default function Dashboard() {
-  const { todayScore, todayLog, totalSales, settings, logs } = useApp();
-  const scoreRef = useRef<HTMLSpanElement>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const [animatedScore, setAnimatedScore] = useState(0);
-
-  const today = formatDate(new Date());
-  const dayNum = getDayNumber(settings.startDate, today);
-  const salesProgress = (totalSales / settings.goalSales) * 100;
-  const projection = getProjection(
-    totalSales,
-    dayNum,
-    settings.goalDays,
-    settings.goalSales
-  );
+  const { isUnlocked } = useApp();
+  const [scores, setScores] = useState({
+    business: 0,
+    study: 0,
+    tech: 0
+  });
 
   useEffect(() => {
-    // Number count-up animation
-    const ctx = gsap.context(() => {
-      gsap.to({}, {
-        duration: 1.5,
-        ease: "power3.out",
-        onUpdate: function() {
-          const progress = this.progress();
-          setAnimatedScore(Math.round(progress * todayScore));
-        }
+    if (!isUnlocked) return;
+    fetchDashboardData();
+  }, [isUnlocked]);
+
+  async function fetchDashboardData() {
+    try {
+      // For dashboard, we get the latest scores or current week average
+      const [busRes, studyRes, techRes] = await Promise.all([
+        fetch('/api/business'),
+        fetch('/api/study'),
+        fetch('/api/tech')
+      ]);
+
+      const busData = await busRes.json();
+      const studyData = await studyRes.json();
+      const techData = await techRes.json();
+
+      // Calculation logic for summary scores
+      const latestBus = busData.length > 0 ? (busData[0]?.is_success ? 100 : 0) : 0;
+      const avgStudy = studyData.length > 0 ? Math.round(studyData.reduce((a: any, b: any) => a + (b.score || 0), 0) / studyData.length) : 0;
+      const techCompletedCount = techData.filter((p: any) => p.is_completed).length;
+      const techScore = Math.round((techCompletedCount / 13) * 100);
+
+      setScores({
+        business: latestBus,
+        study: avgStudy,
+        tech: techScore
       });
 
-      // Progress bar animation
-      gsap.fromTo(
-        progressBarRef.current,
-        { width: "0%" },
-        { width: `${Math.min(100, salesProgress)}%`, duration: 1.5, ease: "power3.out", delay: 0.2 }
-      );
-    });
+      // Animate cards
+      gsap.from('.score-card', { 
+        y: 20, 
+        opacity: 0, 
+        stagger: 0.2, 
+        duration: 0.8, 
+        ease: 'power3.out' 
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
-    return () => ctx.revert();
-  }, [todayScore, salesProgress]);
-
-  const scoreStatus = getScoreStatus(todayScore);
+  if (!isUnlocked) return null;
 
   return (
     <InternalLayout>
-      {/* Header Stat */}
-      <div className="flex justify-between items-end border-b border-white/5 pb-8">
-        <div className="space-y-1">
-          <p className="text-text-dim text-xs font-bold uppercase tracking-[0.2em]">
-            Timeline Status
-          </p>
-          <h1 className="text-2xl font-black text-white">
-            {formatDisplayDate(today)}
-          </h1>
-        </div>
-        <div className="text-right space-y-1">
-          <p className="text-text-dim text-xs font-bold uppercase tracking-[0.2em]">
-            Execution Phase
-          </p>
-          <p className="text-2xl font-black text-white">
-            DAY {dayNum} <span className="text-text-dim text-lg">/ {settings.goalDays}</span>
-          </p>
-        </div>
-      </div>
+      <header className="mb-12">
+        <h1 className="text-4xl font-black tracking-tighter text-white italic uppercase">
+          FlowMe Execute
+        </h1>
+        <p className="text-text-muted mt-2">Unified Performance Matrix</p>
+      </header>
 
-      {/* Goal Section */}
-      <div className="bg-card border border-border p-8 rounded-2xl space-y-6 relative overflow-hidden group">
-        <div className="flex justify-between items-center relative z-10">
-          <div>
-            <h3 className="text-white font-bold text-lg tracking-tight">
-              {settings.goalSales} Sales Target
-            </h3>
-            <p className="text-text-muted text-sm tracking-wide">
-              {totalSales} units secured so far
-            </p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        {/* Business Score */}
+        <Link href="/business" className="score-card bg-bg-card border border-red-500/10 p-8 rounded-3xl relative overflow-hidden group hover:border-red-500/30 transition-all">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
           </div>
-          <div className="text-right">
-            <span className="text-2xl font-black text-white">
-              {Math.floor(salesProgress)}%
-            </span>
+          <span className="text-xs font-bold text-red-500 uppercase tracking-widest block mb-1">Business Momentum</span>
+          <div className="text-6xl font-black text-white mb-4">{scores.business}%</div>
+          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full bg-red-500 transition-all duration-1000" style={{ width: `${scores.business}%` }} />
           </div>
-        </div>
-        
-        <div className="h-3 bg-bg rounded-full overflow-hidden border border-white/5 relative z-10">
-          <div
-            ref={progressBarRef}
-            className="h-full bg-accent relative"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20 animate-pulse" />
-          </div>
-        </div>
-
-        {/* Decorative background glow */}
-        <div className="absolute -right-20 -top-20 w-64 h-64 bg-accent/5 blur-[100px] rounded-full group-hover:bg-accent/10 transition-colors duration-700" />
-      </div>
-
-      {/* Main Score Focus */}
-      <div className="flex flex-col items-center justify-center py-12 space-y-4">
-        <p className="text-text-dim text-xs font-bold uppercase tracking-[0.3em]">
-          Daily Performance Index
-        </p>
-        <div className="text-[12rem] font-black leading-none tracking-tighter text-white tabular-nums flex items-baseline">
-          <span ref={scoreRef}>{animatedScore}</span>
-        </div>
-        
-        <div className={`px-6 py-2 rounded-full border text-sm font-black tracking-[0.2em] uppercase transition-colors duration-500 ${
-          scoreStatus === "pass" 
-            ? "border-green/30 bg-green/10 text-green" 
-            : "border-red/30 bg-red/10 text-red"
-        }`}>
-          {getScoreLabel(todayScore)}
-        </div>
-      </div>
-
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-card border border-border p-8 rounded-2xl flex justify-between items-center">
-          <div>
-            <p className="text-text-dim text-xs font-bold uppercase tracking-widest mb-1">
-              Sales Today
-            </p>
-            <p className="text-3xl font-black text-white">{todayLog.sales}</p>
-          </div>
-          <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
-             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted"><path d="m12 15 2 2 4-4"/><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M9 7h6"/><path d="M9 11h6"/><path d="M9 15h1"/></svg>
-          </div>
-        </div>
-
-        <div className="bg-card border border-border p-8 rounded-2xl flex justify-between items-center">
-          <div>
-            <p className="text-text-dim text-xs font-bold uppercase tracking-widest mb-1">
-              Total Sales
-            </p>
-            <p className="text-3xl font-black text-white">{totalSales}</p>
-          </div>
-          <div className="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center">
-             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71.59-.59"/></svg>
-          </div>
-        </div>
-      </div>
-
-      {/* Projection Box */}
-      <div className="bg-card border border-border p-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="space-y-4 flex-1">
-          <p className="text-text-dim text-xs font-bold uppercase tracking-widest">
-            30-Day Forecast
-          </p>
-          <p className="text-xl font-bold text-white max-w-md">
-            At current velocity, you are projected to reach <span className="text-accent underline decoration-accent/30 underline-offset-4">{projection.projected}</span> total sales.
-          </p>
-        </div>
-        
-        <div className={`px-8 py-4 rounded-xl border-2 flex flex-col items-center justify-center min-w-[160px] ${
-          projection.status === "on-track" 
-            ? "border-green/20 bg-green/5 text-green" 
-            : projection.status === "behind"
-            ? "border-yellow/20 bg-yellow/5 text-yellow"
-            : "border-red/20 bg-red/5 text-red"
-        }`}>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-1">Status</span>
-          <span className="text-lg font-black uppercase tracking-tighter">
-            {projection.status.replace("-", " ")}
-          </span>
-        </div>
-      </div>
-
-      {/* CTA Button */}
-      <div className="pt-8">
-        <Link 
-          href="/day" 
-          className="w-full bg-white text-bg font-black py-6 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.01] active:scale-[0.99] transition-all group shadow-xl"
-        >
-          <span className="uppercase tracking-[0.2em] text-sm">Start / Continue Execution</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </Link>
+
+        {/* Study Score */}
+        <Link href="/study" className="score-card bg-bg-card border border-blue-500/10 p-8 rounded-3xl relative overflow-hidden group hover:border-blue-500/30 transition-all">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <span className="text-xs font-bold text-blue-500 uppercase tracking-widest block mb-1">Study War Mode</span>
+          <div className="text-6xl font-black text-white mb-4">{scores.study}%</div>
+          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${scores.study}%` }} />
+          </div>
+        </Link>
+
+        {/* Tech Score */}
+        <Link href="/tech" className="score-card bg-bg-card border border-emerald-500/10 p-8 rounded-3xl relative overflow-hidden group hover:border-emerald-500/30 transition-all">
+          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest block mb-1">Tech Beast Progress</span>
+          <div className="text-6xl font-black text-white mb-4">{scores.tech}%</div>
+          <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${scores.tech}%` }} />
+          </div>
+        </Link>
+      </div>
+
+      {/* Navigation Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { label: "Execution Calendar", href: "/calendar" },
+          { label: "Performance Analytics", href: "/analytics" },
+          { label: "Systems Settings", href: "/settings" },
+        ].map((item) => (
+          <Link 
+            key={item.href}
+            href={item.href}
+            className="p-10 bg-white/5 border border-white/5 rounded-3xl hover:bg-white hover:text-black transition-all group flex flex-col justify-center items-center text-center gap-2"
+          >
+            <span className="text-sm font-black uppercase tracking-[0.2em]">{item.label}</span>
+          </Link>
+        ))}
       </div>
     </InternalLayout>
   );

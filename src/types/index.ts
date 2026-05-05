@@ -1,23 +1,55 @@
-export interface DayTasks {
-  adOperations: boolean;
-  salesCodOps: boolean;
-  websiteCopyOptimization: boolean;
-  creativeProduction: boolean;
-  sheryiansCoding: boolean;
-  projectBuild: boolean;
-  codingLogicChallenge: boolean;
-  bookReading: boolean;
-  personalBrandContent: boolean;
-  experienceJournal: boolean;
+export interface BusinessWeek {
+  id?: string;
+  week_start_date: string; // YYYY-MM-DD (Monday)
+  bottles_sold: number;
+  creatives_count: number; // 0-3
+  landing_page_test: boolean;
+  insights_count: number; // 0-3
+  system_improvement: boolean;
+  is_success: boolean;
+  created_at?: string;
 }
 
-export interface DayLog {
-  log_date: string; // YYYY-MM-DD
+export interface StudyTask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface StudyWeek {
+  id?: string;
+  week_number: number;
+  month_name: string;
+  tasks: StudyTask[];
   score: number;
-  sales: number;
-  tasks: any;
-  status: string;
-  saved: boolean;
+  created_at?: string;
+}
+
+export interface TechItem {
+  id: string;
+  title: string;
+  youtubeId: string;
+  phase: number;
+  isCertification: boolean;
+}
+
+export interface TechProgress {
+  id?: string;
+  phase_id: number;
+  video_id: string;
+  is_completed: boolean;
+  is_certification: boolean;
+  next_unlocked: boolean;
+  completed_at?: string;
+}
+
+export interface CalendarLog {
+  id?: string;
+  log_date: string;
+  business_score: number;
+  study_score: number;
+  tech_score: number;
+  created_at?: string;
 }
 
 export interface AppSettings {
@@ -28,44 +60,6 @@ export interface AppSettings {
   goalSales: number;
   goalDays: number;
 }
-
-export type TaskKey = keyof DayTasks;
-
-export interface TaskDefinition {
-  key: TaskKey;
-  label: string;
-  weight: number;
-  category: "high" | "medium" | "low";
-}
-
-export const TASK_DEFINITIONS: TaskDefinition[] = [
-  // HIGH IMPACT - BUSINESS & MARKETING (15 pts each = 60)
-  { key: "adOperations", label: "Ad Operations (Run/Optimize)", weight: 15, category: "high" },
-  { key: "salesCodOps", label: "Sales & COD Care Operations", weight: 15, category: "high" },
-  { key: "websiteCopyOptimization", label: "Website Copy & Offer Optimization", weight: 15, category: "high" },
-  { key: "creativeProduction", label: "Creative Production (Weekly Assets)", weight: 15, category: "high" },
-  // MEDIUM IMPACT - TECH BEAST (10 pts each = 30)
-  { key: "sheryiansCoding", label: "Sheryians Coding Session (JS/Backend)", weight: 10, category: "medium" },
-  { key: "projectBuild", label: "Project Build (Social Media Limiter)", weight: 10, category: "medium" },
-  { key: "codingLogicChallenge", label: "Coding Logic Challenge (Problem Solving)", weight: 10, category: "medium" },
-  // LOW IMPACT - PERSONAL BRAND & GROWTH (5 pts each = 15)
-  { key: "bookReading", label: "Marketing Book Reading (Sell Like Crazy)", weight: 5, category: "low" },
-  { key: "personalBrandContent", label: "Personal Brand Content (Script/Shoot/Edit)", weight: 5, category: "low" },
-  { key: "experienceJournal", label: "Experience Journal & Daily Learning", weight: 5, category: "low" },
-];
-
-export const DEFAULT_TASKS: DayTasks = {
-  adOperations: false,
-  salesCodOps: false,
-  websiteCopyOptimization: false,
-  creativeProduction: false,
-  sheryiansCoding: false,
-  projectBuild: false,
-  codingLogicChallenge: false,
-  bookReading: false,
-  personalBrandContent: false,
-  experienceJournal: false,
-};
 
 export const DEFAULT_SETTINGS: AppSettings = {
   password: "1234",

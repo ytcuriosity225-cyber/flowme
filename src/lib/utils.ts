@@ -1,5 +1,3 @@
-import { DayTasks, TASK_DEFINITIONS, TaskKey } from "@/types";
-
 const SETTINGS_KEY = "flowme_sales_settings";
 
 export function getStoredSettings() {
@@ -15,12 +13,6 @@ export function getStoredSettings() {
 export function setStoredSettings(settings: object): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-}
-
-export function calculateScore(tasks: DayTasks): number {
-  return TASK_DEFINITIONS.reduce((total, def) => {
-    return total + (tasks[def.key] ? def.weight : 0);
-  }, 0);
 }
 
 export function getScoreColor(score: number): string {
@@ -58,27 +50,4 @@ export function getDayNumber(startDate: string, currentDate: string): number {
     (current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
   );
   return Math.max(1, diff + 1);
-}
-
-export function getProjection(
-  totalSales: number,
-  dayNumber: number,
-  goalDays: number,
-  goalSales: number
-): { projected: number; status: "on-track" | "behind" | "risk" } {
-  if (dayNumber === 0) return { projected: 0, status: "risk" };
-  const avgPerDay = totalSales / dayNumber;
-  const projected = Math.round(avgPerDay * goalDays);
-
-  if (projected >= goalSales) return { projected, status: "on-track" };
-  if (projected >= goalSales * 0.8) return { projected, status: "behind" };
-  return { projected, status: "risk" };
-}
-
-export function getCompletedTaskLabels(tasks: DayTasks): string[] {
-  return TASK_DEFINITIONS.filter((def) => tasks[def.key]).map((def) => def.label);
-}
-
-export function getTasksByCategory(category: "high" | "medium" | "low") {
-  return TASK_DEFINITIONS.filter((def) => def.category === category);
 }
