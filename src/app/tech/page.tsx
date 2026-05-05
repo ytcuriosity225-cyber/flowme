@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useApp } from '@/context/AppContext';
 import { TechProgress } from '@/types';
 import { InternalLayout } from '@/components/InternalLayout';
 

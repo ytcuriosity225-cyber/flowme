@@ -63,7 +63,7 @@ export default function Dashboard() {
     <InternalLayout>
       <header className="mb-12">
         <h1 className="text-4xl font-black tracking-tighter text-white italic uppercase">
-          FlowMe Execute
+          FlowMe Command Center
         </h1>
         <p className="text-text-muted mt-2">Unified Performance Matrix</p>
       </header>
