@@ -1,18 +1,27 @@
 "use client";
 
-import { useApp } from "@/context/AppContext";
+import { useApp, ThemeCode } from "@/context/AppContext";
 import { InternalLayout } from "@/components/InternalLayout";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { HackerPanel } from "@/components/HackerPanel";
+import { GlitchText } from "@/components/GlitchText";
+import { CyberToggle } from "@/components/CyberToggle";
+
+const THEMES: { id: ThemeCode, name: string, color: string }[] = [
+  { id: "cyber-green", name: "TECH-NOIR GHOST", color: "#00FF41" },
+  { id: "plasma-blue", name: "PLASMA REEF", color: "#00D4FF" },
+  { id: "red-sector", name: "ERROR SECTOR", color: "#FF003C" },
+  { id: "amber-alert", name: "AMBER WARNING", color: "#FFB000" },
+];
 
 export default function SettingsPage() {
-  const { settings, updateSettings, resetAllData, lock } = useApp();
+  const { settings, updateSettings, resetAllData, lock, theme, setTheme } = useApp();
   const router = useRouter();
 
   const [password, setPassword] = useState(settings.password);
   const [goalSales, setGoalSales] = useState(settings.goalSales.toString());
   const [goalDays, setGoalDays] = useState(settings.goalDays.toString());
-  const [nightOwlMode, setNightOwlMode] = useState(settings.nightOwlMode);
   const [isSaved, setIsSaved] = useState(false);
   const [showConfirmReset, setShowConfirmReset] = useState(false);
 
@@ -21,20 +30,9 @@ export default function SettingsPage() {
       password,
       goalSales: parseInt(goalSales) || 300,
       goalDays: parseInt(goalDays) || 30,
-      nightOwlMode,
     });
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
-  };
-
-  const handleToggleAnimations = () => {
-    updateSettings({ animationsEnabled: !settings.animationsEnabled });
-  };
-
-  const handleToggleNightOwl = () => {
-    const newMode = !nightOwlMode;
-    setNightOwlMode(newMode);
-    updateSettings({ nightOwlMode: newMode });
   };
 
   const handleReset = () => {
@@ -45,139 +43,145 @@ export default function SettingsPage() {
 
   return (
     <InternalLayout>
-      <div className="space-y-12">
-        <div className="flex justify-between items-end border-b border-white/5 pb-8">
-          <div className="space-y-1">
-            <p className="text-text-dim text-xs font-black uppercase tracking-[0.2em]">
-              System Configuration
-            </p>
-            <h1 className="text-3xl font-black text-white uppercase italic tracking-tighter">
-              Settings
+      <div className="max-w-5xl mx-auto space-y-12 pb-20">
+        <header className="mb-12">
+            <div className="flex items-center gap-3 mb-2">
+                <span className="status-dot" />
+                <p className="text-text-dim text-[10px] font-black uppercase tracking-[0.4em]">
+                    SYS_MODULE // CONFIGURATION
+                </p>
+            </div>
+            <h1 className="text-4xl font-black tracking-tighter text-white italic uppercase">
+                <GlitchText>SYSTEM SETTINGS</GlitchText>
             </h1>
-          </div>
+            <div className="h-px w-32 bg-linear-to-r from-(--neon-primary) to-transparent mt-4 opacity-50" />
+        </header>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {/* Theme Selector */}
+            <HackerPanel label="NEURAL::THEME_SELECTION" glow>
+                <div className="grid grid-cols-1 gap-4">
+                    {THEMES.map((t) => (
+                        <button
+                            key={t.id}
+                            onClick={() => setTheme(t.id)}
+                            className={`group relative h-16 border px-6 flex items-center justify-between transition-all ${
+                                theme === t.id 
+                                    ? "bg-white/10 border-white shadow-[0_0_20px_rgba(255,255,255,0.1)]" 
+                                    : "bg-black/40 border-(--neon-border) hover:border-white/30"
+                            }`}
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-3 h-3 rounded-full shadow-[0_0_10px_currentColor]" style={{ color: t.color, backgroundColor: t.color }} />
+                                <span className={`text-xs font-black uppercase tracking-widest ${theme === t.id ? "text-white" : "text-text-dim"}`}>
+                                    {t.name}
+                                </span>
+                            </div>
+                            {theme === t.id && (
+                                <span className="text-[9px] font-black italic text-white animate-pulse">ACTIVE_PROTOCOL</span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </HackerPanel>
+
+            <div className="space-y-10">
+                {/* Access & Auth */}
+                <HackerPanel label="SECURITY::VERIFICATION">
+                    <div className="space-y-6">
+                        <div>
+                            <label className="text-[9px] font-black text-text-dim uppercase tracking-[0.3em] mb-2 block">System Passcode</label>
+                            <input 
+                                type="text" 
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full bg-black/50 border border-(--neon-border) px-4 py-3 rounded-none text-white font-mono tracking-[0.4em] focus:outline-none focus:border-(--neon-primary) focus:shadow-[0_0_15px_var(--neon-glow)] transition-all"
+                            />
+                        </div>
+                    </div>
+                </HackerPanel>
+
+                {/* Interface Toggles */}
+                 <HackerPanel label="SYS::INTERFACE">
+                    <div className="space-y-6">
+                        <CyberToggle 
+                            label="GSAP Animations"
+                            checked={settings.animationsEnabled}
+                            onChange={(v) => updateSettings({ animationsEnabled: v })}
+                        />
+                    </div>
+                </HackerPanel>
+            </div>
         </div>
 
-        <div className="space-y-8 max-w-2xl">
-           <div className="bg-card border border-border rounded-2xl p-8 space-y-6">
-             <h2 className="text-sm font-black text-white uppercase tracking-[0.2em] border-b border-white/5 pb-4">
-               Access & Authentication
-             </h2>
-             
-             <div className="space-y-2">
-                <label className="text-[10px] font-black text-text-dim uppercase tracking-widest block">System Passcode</label>
-                <input 
-                  type="text" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-bg border border-border px-4 py-3 rounded-lg text-white font-mono tracking-[0.2em] focus:outline-none focus:border-accent"
-                />
-             </div>
-           </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {/* Operational Targets */}
+            <HackerPanel label="DATA::OBJECTIVES">
+                <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="text-[9px] font-black text-text-dim uppercase tracking-widest block">Target Units</label>
+                        <input 
+                            type="number" 
+                            value={goalSales}
+                            onChange={(e) => setGoalSales(e.target.value)}
+                            className="w-full bg-black/50 border border-(--neon-border) px-4 py-3 rounded-none text-white font-black italic text-2xl focus:outline-none focus:border-(--neon-primary) transition-all"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[9px] font-black text-text-dim uppercase tracking-widest block">Timeline (Days)</label>
+                        <input 
+                            type="number" 
+                            value={goalDays}
+                            onChange={(e) => setGoalDays(e.target.value)}
+                            className="w-full bg-black/50 border border-(--neon-border) px-4 py-3 rounded-none text-white font-black italic text-2xl focus:outline-none focus:border-(--neon-primary) transition-all"
+                        />
+                    </div>
+                </div>
+            </HackerPanel>
 
-           <div className="bg-card border border-border rounded-2xl p-8 space-y-6">
-             <h2 className="text-sm font-black text-white uppercase tracking-[0.2em] border-b border-white/5 pb-4">
-               Operational Targets
-             </h2>
-             
-             <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-text-dim uppercase tracking-widest block">Target Units (Sales)</label>
-                  <input 
-                    type="number" 
-                    value={goalSales}
-                    onChange={(e) => setGoalSales(e.target.value)}
-                    className="w-full bg-bg border border-border px-4 py-3 rounded-lg text-white font-bold tracking-widest focus:outline-none focus:border-accent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-text-dim uppercase tracking-widest block">Timeline (Days)</label>
-                  <input 
-                    type="number" 
-                    value={goalDays}
-                    onChange={(e) => setGoalDays(e.target.value)}
-                    className="w-full bg-bg border border-border px-4 py-3 rounded-lg text-white font-bold tracking-widest focus:outline-none focus:border-accent"
-                  />
-                </div>
-             </div>
-           </div>
-
-           <div className="bg-card border border-border rounded-2xl p-8 space-y-6">
-             <h2 className="text-sm font-black text-white uppercase tracking-[0.2em] border-b border-white/5 pb-4">
-               Interface
-             </h2>
-             
-             <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-white tracking-widest uppercase">GSAP Animations</p>
-                  <p className="text-xs text-text-dim uppercase tracking-widest mt-1">Enable functional transitions</p>
-                </div>
+            {/* Action Buttons */}
+            <div className="flex flex-col justify-end gap-6">
                 <button 
-                  onClick={handleToggleAnimations}
-                  className={`w-14 h-8 rounded-full border-2 transition-colors relative ${settings.animationsEnabled ? "border-green bg-green/10" : "border-border bg-bg"}`}
+                onClick={handleSave}
+                className={`group relative overflow-hidden py-5 font-black text-xs uppercase tracking-[0.4em] italic transition-all border ${
+                    isSaved ? "bg-green-500 border-green-400 text-black shadow-[0_0_30px_rgba(34,197,94,0.4)]" : "bg-white text-black border-white hover:bg-black hover:text-white"
+                }`}
                 >
-                  <div className={`w-5 h-5 rounded-full absolute top-[4px] transition-transform ${settings.animationsEnabled ? "bg-green translate-x-[26px]" : "bg-text-dim translate-x-[4px]"}`} />
+                <span className="relative z-10">{isSaved ? "SYNC_COMPLETE" : "[ EXECUTE_CONFIG_SYNC ]"}</span>
+                {!isSaved && <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform z-0" />}
                 </button>
-             </div>
 
-             <div className="border-t border-white/5 pt-6 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-white tracking-widest uppercase">Night Owl Mode</p>
-                  <p className="text-xs text-text-dim uppercase tracking-widest mt-1">Neon purple accent colors</p>
+                <div className="border border-red-500/20 bg-red-500/5 p-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-[10px] font-black text-red-500 uppercase tracking-[0.3em]">Danger Zone</h2>
+                        <span className="text-[8px] font-mono text-red-500/50">LOGS::WIPE_READY</span>
+                    </div>
+
+                    {!showConfirmReset ? (
+                        <button 
+                            onClick={() => setShowConfirmReset(true)}
+                            className="w-full bg-transparent border border-red-500/30 text-red-500/60 font-black py-4 text-[10px] uppercase tracking-widest hover:border-red-500 hover:text-red-500 transition-all italic"
+                        >
+                            [ INIT_SYSTEM_RESET ]
+                        </button>
+                    ) : (
+                        <div className="flex gap-4">
+                            <button 
+                            onClick={handleReset}
+                            className="flex-1 bg-red-500 text-black font-black py-4 text-[10px] uppercase tracking-widest italic shadow-[0_0_20px_rgba(239,68,68,0.4)]"
+                            >
+                            [ CONFIRM_WIPE ]
+                            </button>
+                            <button 
+                            onClick={() => setShowConfirmReset(false)}
+                            className="px-8 bg-black border border-white/20 text-white font-black py-4 text-[10px] uppercase tracking-widest"
+                            >
+                            CANCEL
+                            </button>
+                        </div>
+                    )}
                 </div>
-                <button 
-                  onClick={handleToggleNightOwl}
-                  className={`w-14 h-8 rounded-full border-2 transition-colors relative ${nightOwlMode ? "border-purple bg-purple/10" : "border-border bg-bg"}`}
-                >
-                  <div className={`w-5 h-5 rounded-full absolute top-[4px] transition-transform ${nightOwlMode ? "bg-purple translate-x-[26px]" : "bg-text-dim translate-x-[4px]"}`} />
-                </button>
-             </div>
-           </div>
-
-           <button 
-             onClick={handleSave}
-             className={`w-full py-5 rounded-xl font-black text-sm uppercase tracking-[0.2em] transition-all flex justify-center items-center gap-2 ${
-               isSaved ? "bg-green text-bg" : "bg-white text-bg hover:scale-[1.01] active:scale-[0.99]"
-             }`}
-           >
-             {isSaved ? "Configuration Updated" : "Save Configuration"}
-           </button>
-
-           <div className="pt-12">
-             <div className="bg-red/5 border border-red/20 rounded-2xl p-8 space-y-6">
-                <div className="space-y-1">
-                  <h2 className="text-sm font-black text-red uppercase tracking-[0.2em]">
-                    Danger Zone
-                  </h2>
-                  <p className="text-xs text-text-dim uppercase tracking-widest leading-relaxed">
-                    This will permanently wipe all execution logs, revenue data, and timeline progress.
-                  </p>
-                </div>
-
-                {!showConfirmReset ? (
-                  <button 
-                    onClick={() => setShowConfirmReset(true)}
-                    className="w-full bg-bg border-2 border-red/30 text-red font-bold py-4 rounded-xl uppercase tracking-widest hover:bg-red/10 transition-colors"
-                  >
-                    Initiate System Reset
-                  </button>
-                ) : (
-                  <div className="flex gap-4">
-                     <button 
-                      onClick={handleReset}
-                      className="flex-1 bg-red text-bg font-black py-4 rounded-xl uppercase tracking-widest transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                      Confirm Reset
-                    </button>
-                     <button 
-                      onClick={() => setShowConfirmReset(false)}
-                      className="px-8 bg-bg border border-border text-white font-bold rounded-xl uppercase tracking-widest hover:bg-white/5 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
-             </div>
-           </div>
+            </div>
         </div>
       </div>
     </InternalLayout>

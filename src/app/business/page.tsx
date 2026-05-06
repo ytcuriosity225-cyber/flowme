@@ -3,13 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { BusinessWeek } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { InternalLayout } from '@/components/InternalLayout';
+import { HackerPanel } from '@/components/HackerPanel';
+import { GlitchText } from '@/components/GlitchText';
+import { CyberToggle } from '@/components/CyberToggle';
 import { gsap } from 'gsap';
 
-import { InternalLayout } from '@/components/InternalLayout';
-
 export default function BusinessPage() {
-  const { isUnlocked } = useApp();
+  const { isUnlocked, settings } = useApp();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [weekData, setWeekData] = useState<Omit<BusinessWeek, 'id' | 'created_at'>>({
@@ -59,135 +60,155 @@ export default function BusinessPage() {
       if (res.ok) {
         const data = await res.json();
         setWeekData(data);
-        gsap.fromTo('.success-badge', { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out' });
+        if (settings.animationsEnabled) {
+            gsap.fromTo('.success-badge', { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out' });
+        }
       }
     } catch (err) {
-      alert('Failed to save');
+      console.error(err);
     } finally {
       setSaving(false);
     }
   }
 
+  if (!isUnlocked) return null;
+
   return (
     <InternalLayout>
-      <div className="max-w-4xl mx-auto">
-      <header className="mb-12">
-        <h1 className="text-4xl font-bold bg-linear-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-          Business Weekly Tracker
-        </h1>
-        <p className="text-text-muted mt-2">Scale the engine. Track the growth.</p>
-      </header>
+      <div className="max-w-5xl mx-auto space-y-12">
+        <header className="mb-12">
+            <div className="flex items-center gap-3 mb-2">
+                <span className="status-dot" />
+                <p className="text-text-dim text-[10px] font-black uppercase tracking-[0.4em]">
+                    SYS_MODULE // REVENUE_ENGINE
+                </p>
+            </div>
+            <h1 className="text-4xl font-black tracking-tighter text-white italic uppercase">
+                <GlitchText>BUSINESS PROTOCOL</GlitchText>
+            </h1>
+            <div className="h-px w-32 bg-linear-to-r from-red-500 to-transparent mt-4 opacity-50" />
+        </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Left Card: KPI */}
-        <div className="bg-bg-card p-8 rounded-2xl border border-white/5 shadow-2xl">
-          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-500"></span>
-            Core KPI
-          </h2>
-          <div className="space-y-4">
-            <label className="block text-sm text-text-muted">Bottles Sold</label>
-            <input
-              type="number"
-              value={weekData.bottles_sold}
-              onChange={(e) => setWeekData({ ...weekData, bottles_sold: parseInt(e.target.value) || 0 })}
-              className="w-full bg-bg p-4 rounded-xl border border-white/10 text-3xl font-bold focus:border-red-500/50 transition-colors"
-              placeholder="0"
-            />
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* Core KPI Panel */}
+          <HackerPanel label="ALGO::CORE_KPI" glow>
+            <div className="space-y-8">
+                <div>
+                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 mb-4 block">
+                        <GlitchText>BOTTLES_SOLD_OUTPUT</GlitchText>
+                    </label>
+                    <input
+                        type="number"
+                        value={weekData.bottles_sold}
+                        onChange={(e) => setWeekData({ ...weekData, bottles_sold: parseInt(e.target.value) || 0 })}
+                        className="w-full bg-black/40 p-6 rounded-none border border-(--neon-border) text-5xl font-black italic focus:border-red-500/50 focus:shadow-[0_0_20px_rgba(239,68,68,0.2)] transition-all outline-none"
+                        style={{ color: 'var(--sys-business)' }}
+                        placeholder="000"
+                    />
+                </div>
+                
+                <div className="p-4 bg-red-500/5 border-l-2 border-red-500/30">
+                    <p className="text-[11px] font-mono text-text-muted leading-relaxed">
+                        Scale established. Tracking distribution volume for current cycle. 
+                        Target optimization pending...
+                    </p>
+                </div>
+            </div>
+          </HackerPanel>
+
+          {/* Weekly Protocol Panel */}
+          <HackerPanel label="INIT::WEEKLY_STACK" glow>
+            <div className="space-y-10 py-4">
+                {/* 3 Creatives */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center px-1">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-white/80">
+                        <GlitchText>3 Creatives Produced</GlitchText>
+                    </span>
+                    <span className="text-[10px] font-mono text-red-500">[{weekData.creatives_count}/3]</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-6">
+                    {[1, 2, 3].map((i) => (
+                      <CyberToggle 
+                        key={i}
+                        label={`NODE_0${i}`}
+                        checked={weekData.creatives_count >= i}
+                        onChange={(v) => setWeekData({ ...weekData, creatives_count: v ? i : i - 1 })}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="h-px bg-(--neon-border) opacity-20" />
+
+                <div className="space-y-8">
+                    <CyberToggle 
+                        label="Landing Page Test"
+                        checked={weekData.landing_page_test}
+                        onChange={(v) => setWeekData({...weekData, landing_page_test: v})}
+                    />
+
+                    {/* 3 Insights */}
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center px-1">
+                            <span className="text-[11px] font-black uppercase tracking-widest text-white/80">
+                                <GlitchText>3 Performance Insights</GlitchText>
+                            </span>
+                            <span className="text-[10px] font-mono text-white">[{weekData.insights_count}/3]</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-6">
+                            {[1, 2, 3].map((i) => (
+                            <CyberToggle 
+                                key={i}
+                                label={`DATA_0${i}`}
+                                checked={weekData.insights_count >= i}
+                                onChange={(v) => setWeekData({ ...weekData, insights_count: v ? i : i - 1 })}
+                            />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="h-px bg-(--neon-border) opacity-20" />
+
+                    <CyberToggle 
+                        label="System Improvement"
+                        checked={weekData.system_improvement}
+                        onChange={(v) => setWeekData({...weekData, system_improvement: v})}
+                    />
+                </div>
+            </div>
+          </HackerPanel>
         </div>
 
-        {/* Right Card: Checklist */}
-        <div className="bg-bg-card p-8 rounded-2xl border border-white/5 shadow-2xl">
-          <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-            Weekly Protocol
-          </h2>
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <span>3 Creatives Produced</span>
-              <div className="flex gap-2">
-                {[1, 2, 3].map((i) => (
-                  <button
-                    key={i}
-                    onClick={() => setWeekData({ ...weekData, creatives_count: i === weekData.creatives_count ? i - 1 : i })}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                      weekData.creatives_count >= i ? 'bg-red-500 text-white' : 'bg-white/5 text-text-muted'
-                    }`}
-                  >
-                    {i}
-                  </button>
-                ))}
+        {/* Global Action Bar */}
+        <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-8 pt-12 border-t border-(--neon-border)">
+          <div className="flex items-center gap-6">
+              <div className="flex flex-col gap-1">
+                <label className="text-[9px] font-black uppercase tracking-widest text-text-dim">CYCLE_DATE</label>
+                <input 
+                    type="date" 
+                    value={weekData.week_start_date}
+                    onChange={(e) => setWeekData({ ...weekData, week_start_date: e.target.value })}
+                    className="bg-black/50 border border-(--neon-border) text-(--neon-primary) rounded-none px-4 py-2 font-mono text-xs focus:border-(--neon-primary) outline-none"
+                />
               </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span>Landing Page Test</span>
-              <button
-                onClick={() => setWeekData({ ...weekData, landing_page_test: !weekData.landing_page_test })}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  weekData.landing_page_test ? 'bg-orange-500 text-white' : 'bg-white/5 text-text-muted'
-                }`}
-              >
-                {weekData.landing_page_test ? 'Done' : 'Pending'}
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span>3 Insights Found</span>
-              <div className="flex gap-2">
-                {[1, 2, 3].map((i) => (
-                  <button
-                    key={i}
-                    onClick={() => setWeekData({ ...weekData, insights_count: i === weekData.insights_count ? i - 1 : i })}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                      weekData.insights_count >= i ? 'bg-red-500 text-white' : 'bg-white/5 text-text-muted'
-                    }`}
-                  >
-                    {i}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span>System Improvement</span>
-              <button
-                onClick={() => setWeekData({ ...weekData, system_improvement: !weekData.system_improvement })}
-                className={`px-4 py-2 rounded-lg transition-all ${
-                  weekData.system_improvement ? 'bg-orange-500 text-white' : 'bg-white/5 text-text-muted'
-                }`}
-              >
-                {weekData.system_improvement ? 'Implements' : 'Plan'}
-              </button>
-            </div>
+              
+              {weekData.is_success && (
+                <div className="success-badge px-6 py-2 bg-green-500/10 text-green-500 border border-green-500/30 font-black italic text-[10px] uppercase tracking-[0.3em] shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+                  ✓ SUCCESS_WEEK_VALIDATED
+                </div>
+              )}
           </div>
+          
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="group relative px-16 py-5 bg-transparent border border-red-500/50 text-red-500 font-black italic uppercase tracking-[0.3em] hover:bg-red-500 hover:text-black transition-all disabled:opacity-50 overflow-hidden"
+          >
+            <span className="relative z-10">{saving ? 'UPLOADING...' : '[ EXECUTE_SAVE ]'}</span>
+            <div className="absolute inset-0 bg-red-500/20 translate-y-full group-hover:translate-y-0 transition-transform" />
+          </button>
         </div>
-      </div>
-
-      <div className="mt-12 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <input 
-            type="date" 
-            value={weekData.week_start_date}
-            onChange={(e) => setWeekData({ ...weekData, week_start_date: e.target.value })}
-            className="bg-white/5 border border-white/10 rounded-lg p-2 text-sm"
-          />
-          {weekData.is_success && (
-            <div className="success-badge px-4 py-1 bg-green-500/20 text-green-500 border border-green-500/30 rounded-full text-xs font-bold uppercase tracking-widest">
-              Success Week ✓
-            </div>
-          )}
-        </div>
-        
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="px-12 py-4 bg-white text-black font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all disabled:opacity-50"
-        >
-          {saving ? 'Saving...' : 'Save Weekly Log'}
-        </button>
-      </div>
       </div>
     </InternalLayout>
   );

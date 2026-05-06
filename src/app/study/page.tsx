@@ -3,34 +3,38 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { StudyWeek, StudyTask } from '@/types';
-import { gsap } from 'gsap';
 import { InternalLayout } from '@/components/InternalLayout';
+import { HackerPanel } from '@/components/HackerPanel';
+import { NeonGauge } from '@/components/NeonGauge';
+import { GlitchText } from '@/components/GlitchText';
+import { CyberToggle } from '@/components/CyberToggle';
+import { gsap } from 'gsap';
 
 const MAY_STUDY_PLAN = [
   {
     week: 1,
-    title: "Week 1: Brain Exposure",
+    title: "Week 01: BRAIN_EXPOSURE",
     tasks: ["Subject Scan", "Light Understanding", "Goal: Flow over perfection"]
   },
   {
     week: 2,
-    title: "Week 2: Strategic Preparation",
+    title: "Week 02: STRATEGIC_PREP",
     tasks: ["Important Topics (Scheme wise)", "Formula Memorization", "Methodology Review"]
   },
   {
     week: 3,
-    title: "Week 3: War Phase",
+    title: "Week 03: WAR_PHASE",
     tasks: ["Deep Preparation", "Weak Area Fixing", "Past Paper Analysis"]
   },
   {
     week: 4,
-    title: "Week 4: Final Assault",
+    title: "Week 04: FINAL_ASSAULT",
     tasks: ["Self Testing (Sendups)", "Daily Revision", "Final Polish"]
   }
 ];
 
 export default function StudyPage() {
-  const { isUnlocked } = useApp();
+  const { isUnlocked, settings } = useApp();
   const [activeWeek, setActiveWeek] = useState(1);
   const [weekData, setWeekData] = useState<StudyWeek>({
     week_number: 1,
@@ -40,7 +44,6 @@ export default function StudyPage() {
   });
   const [loading, setLoading] = useState(true);
 
-  const isMay = new Date().getMonth() === 4; // 0-indexed, May is 4
   const isAfterMay = new Date().getMonth() > 4;
 
   useEffect(() => {
@@ -55,7 +58,6 @@ export default function StudyPage() {
       if (data && data.tasks) {
         setWeekData(data);
       } else {
-        // Initialize new week data
         const plan = MAY_STUDY_PLAN.find(p => p.week === activeWeek);
         setWeekData({
           week_number: activeWeek,
@@ -80,7 +82,6 @@ export default function StudyPage() {
     const updatedWeek = { ...weekData, tasks: newTasks, score };
     setWeekData(updatedWeek);
 
-    // Save to API
     await fetch('/api/study', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -88,79 +89,118 @@ export default function StudyPage() {
     });
   }
 
+  if (!isUnlocked) return null;
+
   return (
     <InternalLayout>
       {isAfterMay ? (
-        <div className="p-8 text-center bg-card border border-border rounded-3xl">
-          <h2 className="text-2xl font-bold text-text-muted italic uppercase">Study Season Over.</h2>
-          <p className="mt-2 text-text-dim uppercase tracking-widest text-xs">Check calendar for results.</p>
-        </div>
+        <HackerPanel label="SYS::END_OF_CYCLE" glow className="max-w-xl mx-auto text-center py-20">
+          <h2 className="text-2xl font-black text-text-muted italic uppercase mb-4">Study Season Offline.</h2>
+          <p className="text-text-dim uppercase tracking-[0.3em] text-[10px]">OPERATIONAL CYCLE CONCLUDED // CHECK CALENDAR FOR TELEMETRY</p>
+        </HackerPanel>
       ) : (
-        <div className="max-w-4xl mx-auto">
-      <header className="mb-12 flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-black italic uppercase tracking-tighter bg-linear-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent">
-            WAR MODE: STUDY
-          </h1>
-          <p className="text-text-muted font-mono text-sm mt-1">Status: Active (Month: May)</p>
-        </div>
-        <div className="text-right">
-          <div className="text-5xl font-black text-white">{weekData.score || 0}%</div>
-          <div className="text-xs uppercase font-bold text-blue-500">Weekly Score</div>
-        </div>
-      </header>
+        <div className="max-w-5xl mx-auto space-y-12">
+            <header className="mb-12">
+                <div className="flex items-center gap-3 mb-2">
+                    <span className="status-dot animate-pulse bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+                    <p className="text-red-500/80 text-[10px] font-black uppercase tracking-[0.4em]">
+                        WAR_MODE // RED_SECTOR_EXECUTION
+                    </p>
+                </div>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+                    <div>
+                        <h1 className="text-4xl font-black tracking-tighter text-white italic uppercase">
+                            <GlitchText>WAR MODE: STUDY_PROTOCOL</GlitchText>
+                        </h1>
+                        <div className="h-px w-32 bg-linear-to-r from-red-600 to-transparent mt-4 opacity-70" />
+                    </div>
+                    <div className="hidden md:block">
+                        <NeonGauge 
+                            value={weekData.score || 0} 
+                            label="WEEKLY PERFORMANCE" 
+                            subLabel="MASTERY" 
+                            color="var(--sys-study)"
+                            size={120}
+                        />
+                    </div>
+                </div>
+            </header>
 
-      {/* Week Navigation */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        {[1, 2, 3, 4].map((w) => (
-          <button
-            key={w}
-            onClick={() => setActiveWeek(w)}
-            className={`p-4 rounded-xl border font-bold transition-all ${
-              activeWeek === w 
-                ? 'bg-blue-500 border-blue-400 text-white shadow-lg shadow-blue-500/25' 
-                : 'bg-bg-card border-white/5 text-text-muted hover:border-white/20'
-            }`}
-          >
-            WEEK {w}
-          </button>
-        ))}
-      </div>
-
-      {/* active week detail */}
-      <div className="bg-bg-card border border-white/5 rounded-2xl p-8 study-card shadow-2xl">
-        <h2 className="text-2xl font-bold mb-6 italic text-white flex items-center gap-3">
-          <span className="w-1.5 h-8 bg-blue-500 rounded-full"></span>
-          {MAY_STUDY_PLAN.find(p => p.week === activeWeek)?.title}
-        </h2>
-
-        <div className="space-y-4">
-          {weekData.tasks?.map((task) => (
-            <div 
-              key={task.id}
-              onClick={() => toggleTask(task.id)}
-              className={`p-6 rounded-xl border cursor-pointer transition-all flex items-center gap-4 ${
-                task.completed 
-                  ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' 
-                  : 'bg-white/5 border-white/5 text-text-muted hover:border-white/10'
-              }`}
-            >
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                task.completed ? 'bg-blue-500 border-blue-500 text-white' : 'border-white/20'
-              }`}>
-                {task.completed && '✓'}
-              </div>
-              <span className={`text-lg font-medium ${task.completed ? 'line-through opacity-50' : ''}`}>
-                {task.text}
-              </span>
+            {/* Week Selector HUD */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map((w) => (
+                    <button
+                        key={w}
+                        onClick={() => setActiveWeek(w)}
+                        className={`group relative overflow-hidden h-14 border transition-all ${
+                            activeWeek === w 
+                                ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_20px_rgba(0,212,255,0.2)]' 
+                                : 'border-(--neon-border) bg-black/40 hover:border-blue-400/50'
+                        }`}
+                    >
+                        <div className="flex items-center justify-center gap-3">
+                            <span className={`text-[10px] font-black ${activeWeek === w ? 'text-blue-400' : 'text-text-dim'}`}>
+                                0{w}
+                            </span>
+                            <span className={`text-xs font-black uppercase tracking-widest ${activeWeek === w ? 'text-white' : 'text-text-muted opacity-50'}`}>
+                                WEEK_ACCESS
+                            </span>
+                        </div>
+                        {activeWeek === w && (
+                            <div className="absolute inset-0 border-t border-l border-blue-400/50 pointer-events-none" />
+                        )}
+                    </button>
+                ))}
             </div>
-          ))}
-        </div>
-      </div>
 
-      <div className="mt-12 bg-blue-500/5 p-6 rounded-2xl border border-blue-500/10 text-sm text-blue-400 font-mono italic">
-        "War is not about who is right, it's about who is left. Prepare accordingly."
-      </div>
+            {/* Active Tactical Objectives */}
+            <HackerPanel 
+                label={`OBJECTIVE::${MAY_STUDY_PLAN.find(p => p.week === activeWeek)?.title.split(': ')[1]}`} 
+                glow
+            >
+                <div className="space-y-4">
+                    {weekData.tasks?.map((task) => (
+                        <div 
+                            key={task.id}
+                            className={`group h-20 transition-all border relative overflow-hidden flex items-center justify-between px-8 ${
+                                task.completed 
+                                    ? 'bg-(--neon-dim) border-(--neon-primary)/30' 
+                                    : 'bg-black/20 border-(--neon-border) hover:border-(--neon-primary)/50'
+                            }`}
+                        >
+                            <div className="absolute inset-y-0 left-0 w-1 bg-transparent group-hover:bg-red-500/50 transition-all" />
+                            {task.completed && <div className="absolute inset-y-0 left-0 w-1 bg-red-600" />}
+
+                            <div className="flex-1">
+                                <div className={`text-sm font-black tracking-widest uppercase transition-all ${
+                                    task.completed ? 'text-red-500 opacity-60 line-through' : 'text-white'
+                                }`}>
+                                    {!task.completed ? <GlitchText>{task.text}</GlitchText> : task.text}
+                                </div>
+                                <div className="text-[9px] font-mono text-text-dim mt-1 uppercase">
+                                    OBJECTIVE_PRIORITY: HIGH_SPECTRAL
+                                </div>
+                            </div>
+
+                            <CyberToggle 
+                                checked={task.completed}
+                                onChange={() => toggleTask(task.id)}
+                            />
+                        </div>
+                    ))}
+                </div>
+            </HackerPanel>
+
+            {/* Motivation Feed */}
+            <div className="bg-black/60 border-l-4 border-blue-500 p-8 relative overflow-hidden backdrop-blur-xl">
+                <div className="absolute top-0 right-0 p-2 text-[8px] font-mono text-blue-500/30">ID::TERM_773</div>
+                <div className="flex gap-4 items-center">
+                    <div className="text-xl text-blue-500">{" >> "}</div>
+                    <div className="text-sm font-black italic text-blue-400/80 tracking-wide">
+                        "War is not about who is right, it's about who is left. Prepare accordingly."
+                    </div>
+                </div>
+            </div>
         </div>
       )}
     </InternalLayout>

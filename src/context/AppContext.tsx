@@ -10,6 +10,8 @@ import {
   setStoredSettings,
 } from "@/lib/utils";
 
+export type ThemeCode = "cyber-green" | "plasma-blue" | "red-sector" | "amber-alert";
+
 interface AppContextType {
   // Auth
   isUnlocked: boolean;
@@ -20,7 +22,13 @@ interface AppContextType {
   settings: AppSettings;
   updateSettings: (partial: Partial<AppSettings>) => void;
   resetAllData: () => void;
+
+  // Theming
+  theme: ThemeCode;
+  setTheme: (theme: ThemeCode) => void;
 }
+
+const THEME_KEY = "flowme_theme";
 
 const AppContext = createContext<AppContextType | null>(null);
 
@@ -28,13 +36,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [theme, setThemeState] = useState<ThemeCode>("cyber-green");
 
-  // Load settings
+  // Load settings + theme
   useEffect(() => {
     const storedSettings = getStoredSettings();
     if (storedSettings) {
       setSettings({ ...DEFAULT_SETTINGS, ...storedSettings });
     }
+
+    // Load saved theme
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem(THEME_KEY) as ThemeCode | null;
+      if (savedTheme) {
+        setThemeState(savedTheme);
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      } else {
+        document.documentElement.setAttribute("data-theme", "cyber-green");
+      }
+    }
+
     setIsLoaded(true);
   }, []);
 
@@ -42,6 +63,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoaded) setStoredSettings(settings);
   }, [settings, isLoaded]);
+
+  const setTheme = useCallback((newTheme: ThemeCode) => {
+    setThemeState(newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(THEME_KEY, newTheme);
+    }
+  }, []);
 
   const unlock = useCallback(
     (password: string) => {
@@ -61,14 +90,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const resetAllData = useCallback(async () => {
-    // Reset core settings if needed
     setSettings(DEFAULT_SETTINGS);
   }, []);
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-text-muted border-t-accent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#050508" }}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-5 h-5 border-2 border-sys-tech border-t-transparent rounded-full animate-spin" />
+          <span className="text-[10px] font-mono tracking-[0.3em] uppercase" style={{ color: "#00FF41" }}>
+            INITIALIZING NEURO-FLOW OS...
+          </span>
+        </div>
       </div>
     );
   }
@@ -82,6 +115,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         settings,
         updateSettings,
         resetAllData,
+        theme,
+        setTheme,
       }}
     >
       {children}

@@ -1,10 +1,30 @@
 @import "tailwindcss";
 
+/* ============================================
+   NEURO-FLOW OS — Design System v3.0
+   4 Dynamic Access Code Themes
+   ============================================ */
+
 @theme {
-  --color-bg: #0B0B0B;
-  --color-card: #111111;
-  --color-card-hover: #1a1a1a;
-  --color-border: #222222;
+  /* === CORE BACKGROUNDS === */
+  --color-bg-void: #050508;
+  --color-bg: #050508;
+  --color-card: #0a0a0f;
+  --color-card-hover: #0f0f16;
+  --color-border: #1a1a2e;
+
+  /* === DOMAIN-SPECIFIC COLORS === */
+  --color-sys-business: #FF003C;
+  --color-sys-study: #00D4FF;
+  --color-sys-tech: #00FF41;
+
+  /* === TEXT LEVELS === */
+  --color-text: #E0E0E0;
+  --color-text-primary: #E0E0E0;
+  --color-text-muted: #6B6B80;
+  --color-text-dim: #3A3A50;
+
+  /* === LEGACY PALETTE === */
   --color-green: #22c55e;
   --color-green-dim: #166534;
   --color-red: #ef4444;
@@ -12,12 +32,73 @@
   --color-yellow: #eab308;
   --color-yellow-dim: #854d0e;
   --color-accent: #3b82f6;
-  --color-text: #f5f5f5;
-  --color-text-muted: #737373;
-  --color-text-dim: #525252;
 
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* === FONTS === */
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  --font-sans: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
 }
+
+/* ============================================
+   THEME: ACCESS CODE DEFINITIONS
+   Applied via data-theme attribute on <html>
+   ============================================ */
+
+:root,
+[data-theme="cyber-green"] {
+  --neon-primary: #00FF41;
+  --neon-accent: #39FF14;
+  --neon-glow: rgba(0, 255, 65, 0.15);
+  --neon-glow-strong: rgba(0, 255, 65, 0.35);
+  --neon-glow-ultra: rgba(0, 255, 65, 0.6);
+  --neon-text: rgba(0, 255, 65, 0.9);
+  --neon-border: rgba(0, 255, 65, 0.25);
+  --neon-selection: rgba(0, 255, 65, 0.2);
+  --neon-dim: rgba(0, 255, 65, 0.08);
+  --matrix-char-color: #00FF41;
+}
+
+[data-theme="plasma-blue"] {
+  --neon-primary: #00D4FF;
+  --neon-accent: #0EA5E9;
+  --neon-glow: rgba(0, 212, 255, 0.15);
+  --neon-glow-strong: rgba(0, 212, 255, 0.35);
+  --neon-glow-ultra: rgba(0, 212, 255, 0.6);
+  --neon-text: rgba(0, 212, 255, 0.9);
+  --neon-border: rgba(0, 212, 255, 0.25);
+  --neon-selection: rgba(0, 212, 255, 0.2);
+  --neon-dim: rgba(0, 212, 255, 0.08);
+  --matrix-char-color: #00D4FF;
+}
+
+[data-theme="red-sector"] {
+  --neon-primary: #FF003C;
+  --neon-accent: #EF4444;
+  --neon-glow: rgba(255, 0, 60, 0.15);
+  --neon-glow-strong: rgba(255, 0, 60, 0.35);
+  --neon-glow-ultra: rgba(255, 0, 60, 0.6);
+  --neon-text: rgba(255, 0, 60, 0.9);
+  --neon-border: rgba(255, 0, 60, 0.25);
+  --neon-selection: rgba(255, 0, 60, 0.2);
+  --neon-dim: rgba(255, 0, 60, 0.08);
+  --matrix-char-color: #FF003C;
+}
+
+[data-theme="amber-alert"] {
+  --neon-primary: #FFB000;
+  --neon-accent: #F59E0B;
+  --neon-glow: rgba(255, 176, 0, 0.15);
+  --neon-glow-strong: rgba(255, 176, 0, 0.35);
+  --neon-glow-ultra: rgba(255, 176, 0, 0.6);
+  --neon-text: rgba(255, 176, 0, 0.9);
+  --neon-border: rgba(255, 176, 0, 0.25);
+  --neon-selection: rgba(255, 176, 0, 0.2);
+  --neon-dim: rgba(255, 176, 0, 0.08);
+  --matrix-char-color: #FFB000;
+}
+
+/* ============================================
+   BASE STYLES
+   ============================================ */
 
 @layer base {
   * {
@@ -31,43 +112,195 @@
   }
 
   body {
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-sans);
+    background-color: #050508;
+    color: #E0E0E0;
+    font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
   }
 
+  /* Neon-themed text selection */
   ::selection {
-    background-color: rgba(59, 130, 246, 0.3);
-    color: #fff;
+    background-color: var(--neon-selection);
+    color: var(--neon-primary);
   }
 
+  /* Number input: remove spinners */
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
-
   input[type="number"] {
     -moz-appearance: textfield;
+    appearance: textfield;
   }
 
+  /* Custom scrollbar: neon themed */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
-
   ::-webkit-scrollbar-track {
-    background: var(--color-bg);
+    background: #050508;
   }
-
   ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 3px;
+    background: var(--neon-border);
+    border-radius: 2px;
   }
-
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-text-dim);
+    background: var(--neon-primary);
   }
+}
+
+/* ============================================
+   ANIMATIONS & EFFECTS
+   ============================================ */
+
+/* --- Neon Border Pulse --- */
+@keyframes neon-pulse {
+  0%, 100% { border-color: var(--neon-border); box-shadow: 0 0 4px var(--neon-glow); }
+  50%      { border-color: var(--neon-primary); box-shadow: 0 0 12px var(--neon-glow-strong), 0 0 30px var(--neon-glow); }
+}
+.neon-pulse {
+  animation: neon-pulse 4s ease-in-out infinite;
+}
+
+/* --- Scanline CRT Effect --- */
+@keyframes scanline-move {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.scanline-overlay {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+}
+.scanline-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+}
+.scanline-overlay::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--neon-glow),
+    transparent
+  );
+  animation: scanline-move 8s linear infinite;
+  opacity: 0.4;
+}
+
+/* --- CRT Noise Grain --- */
+.crt-noise {
+  position: relative;
+}
+.crt-noise::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+  z-index: 10000;
+}
+
+/* --- Glitch flicker on hover --- */
+@keyframes glitch-flicker {
+  0%   { text-shadow: 2px 0 var(--neon-primary), -2px 0 var(--neon-accent); }
+  20%  { text-shadow: -1px 0 var(--neon-accent), 1px 0 var(--neon-primary); }
+  40%  { text-shadow: 0 0 transparent; }
+  60%  { text-shadow: 1px 0 var(--neon-primary), -1px 0 var(--neon-accent); }
+  80%  { text-shadow: -2px 0 var(--neon-accent), 2px 0 var(--neon-primary); }
+  100% { text-shadow: 0 0 transparent; }
+}
+.glitch-hover:hover {
+  animation: glitch-flicker 0.15s ease-in-out;
+}
+
+/* --- Neon text glow --- */
+.neon-text {
+  color: var(--neon-primary);
+  text-shadow: 0 0 7px var(--neon-glow), 0 0 20px var(--neon-glow), 0 0 40px var(--neon-glow);
+}
+.neon-text-subtle {
+  color: var(--neon-primary);
+  text-shadow: 0 0 5px var(--neon-glow);
+}
+
+/* --- Neon box glow --- */
+.neon-box {
+  border: 1px solid var(--neon-border);
+  box-shadow: 0 0 8px var(--neon-glow), inset 0 0 8px var(--neon-dim);
+}
+.neon-box-strong {
+  border: 1px solid var(--neon-primary);
+  box-shadow: 0 0 15px var(--neon-glow-strong), 0 0 40px var(--neon-glow), inset 0 0 15px var(--neon-dim);
+}
+
+/* --- Background vignette --- */
+.vignette::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, #050508 100%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* --- Blinking cursor --- */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+.blink {
+  animation: blink-cursor 1s step-end infinite;
+}
+
+/* --- Status dot pulse --- */
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--neon-primary); }
+  50%      { opacity: 0.4; box-shadow: 0 0 1px var(--neon-primary); }
+}
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--neon-primary);
+  animation: dot-pulse 2s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* --- 3D Grid Persistence --- */
+.perspective-1000 {
+  perspective: 1000px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+/* --- Utility: bg-bg-card (legacy compat) --- */
+.bg-bg-card {
+  background-color: #0a0a0f;
+}
+.bg-bg {
+  background-color: #050508;
 }
