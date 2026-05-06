@@ -22,7 +22,7 @@ export function Sidebar() {
     <aside className="w-64 border-r border-border flex flex-col bg-bg/50 backdrop-blur-xl h-screen sticky top-0">
       <div className="p-8 border-b border-border">
         <h2 className="text-xl font-black tracking-tighter text-white uppercase italic">
-          FLOWME
+          NEURO-FLOW OS
         </h2>
       </div>
 

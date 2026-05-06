@@ -3,13 +3,31 @@
 import { useEffect } from "react";
 import { MatrixRain } from "./MatrixRain";
 import { ScanlineOverlay } from "./ScanlineOverlay";
-import { playBlip, playChirp } from "@/lib/audio";
+import { playBlip, playChirp, setAudioPreferences, startAmbientHum } from "@/lib/audio";
+import { useApp } from "@/context/AppContext";
 
 /**
  * GlobalEffects — Renders the Matrix Rain background and CRT Scanline overlay.
+ * Also manages global sound effects for all interactive elements.
  * Must be placed inside AppProvider since these components read settings.
  */
 export function GlobalEffects() {
+  const { settings } = useApp();
+
+  // Sync audio preferences from settings
+  useEffect(() => {
+    setAudioPreferences({
+      uiFeedbackSounds: settings.audio.uiFeedbackSounds,
+      aiVoiceNarrator: settings.audio.aiVoiceNarrator,
+    });
+
+    // Auto-start ambient hum if enabled
+    if (settings.audio.ambientHum) {
+      startAmbientHum();
+    }
+  }, [settings.audio]);
+
+  // Global sound effects for all interactive elements
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;

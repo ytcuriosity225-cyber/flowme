@@ -4,13 +4,23 @@
  */
 
 let audioCtx: AudioContext | null = null;
+let ambientOsc: OscillatorNode | null = null;
+let ambientGain: GainNode | null = null;
+let _uiSoundsEnabled = true;
+let _aiVoiceEnabled = true;
 
-function getAudioContext(): AudioContext {
-  if (typeof window === "undefined") return null as any;
+function getAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
   return audioCtx;
+}
+
+/** Update audio settings at runtime */
+export function setAudioPreferences(prefs: { uiFeedbackSounds?: boolean; aiVoiceNarrator?: boolean }): void {
+  if (prefs.uiFeedbackSounds !== undefined) _uiSoundsEnabled = prefs.uiFeedbackSounds;
+  if (prefs.aiVoiceNarrator !== undefined) _aiVoiceEnabled = prefs.aiVoiceNarrator;
 }
 
 /**
@@ -19,21 +29,11 @@ function getAudioContext(): AudioContext {
 export function triggerHaptic(style: "light" | "medium" | "heavy" | "success" | "error" = "light"): void {
   if (typeof navigator !== "undefined" && navigator.vibrate) {
     switch (style) {
-      case "light":
-        navigator.vibrate(10);
-        break;
-      case "medium":
-        navigator.vibrate(20);
-        break;
-      case "heavy":
-        navigator.vibrate([30, 20, 30]);
-        break;
-      case "success":
-        navigator.vibrate([10, 50, 10]);
-        break;
-      case "error":
-        navigator.vibrate([50, 100, 50, 100, 50]);
-        break;
+      case "light": navigator.vibrate(10); break;
+      case "medium": navigator.vibrate(20); break;
+      case "heavy": navigator.vibrate([30, 20, 30]); break;
+      case "success": navigator.vibrate([10, 50, 10]); break;
+      case "error": navigator.vibrate([50, 100, 50, 100, 50]); break;
     }
   }
 }
@@ -42,29 +42,30 @@ export function triggerHaptic(style: "light" | "medium" | "heavy" | "success" | 
  * Plays a short "blip" sound
  */
 export function playBlip(): void {
+  if (!_uiSoundsEnabled) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
-    
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    
+
     osc.type = "sine";
-    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.05);
-    
+
     gain.gain.setValueAtTime(0.1, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-    
+
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
+
     osc.start();
     osc.stop(ctx.currentTime + 0.05);
-    
+
     triggerHaptic("light");
-  } catch (e) {
-    console.warn("Audio Context failure:", e);
+  } catch {
+    // Silent
   }
 }
 
@@ -72,29 +73,30 @@ export function playBlip(): void {
  * Plays a short "chirp" sound
  */
 export function playChirp(): void {
+  if (!_uiSoundsEnabled) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
-    
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    
+
     osc.type = "square";
     osc.frequency.setValueAtTime(400, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.08);
-    
+
     gain.gain.setValueAtTime(0.05, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-    
+
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
+
     osc.start();
     osc.stop(ctx.currentTime + 0.08);
-    
+
     triggerHaptic("medium");
-  } catch (e) {
-    console.warn("Audio Context failure:", e);
+  } catch {
+    // Silent
   }
 }
 
@@ -103,14 +105,11 @@ export function playChirp(): void {
  */
 export function playMechanicalClick(): Promise<void> {
   return new Promise((resolve) => {
+    if (!_uiSoundsEnabled) { resolve(); return; }
     try {
       const ctx = getAudioContext();
-      if (!ctx) {
-        resolve();
-        return;
-      }
+      if (!ctx) { resolve(); return; }
 
-      // Layer 1: Sharp click (noise burst)
       const bufferSize = ctx.sampleRate * 0.03;
       const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const noiseData = noiseBuffer.getChannelData(0);
@@ -133,7 +132,6 @@ export function playMechanicalClick(): Promise<void> {
       noiseGain.connect(ctx.destination);
       noiseSource.start(ctx.currentTime);
 
-      // Layer 2: Low thud
       const osc = ctx.createOscillator();
       osc.type = "sine";
       osc.frequency.setValueAtTime(150, ctx.currentTime);
@@ -148,7 +146,6 @@ export function playMechanicalClick(): Promise<void> {
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.1);
 
-      // Layer 3: High metallic ping
       const ping = ctx.createOscillator();
       ping.type = "square";
       ping.frequency.setValueAtTime(4200, ctx.currentTime);
@@ -175,11 +172,11 @@ export function playMechanicalClick(): Promise<void> {
  * Plays a system boot-up sequence sound
  */
 export function playBootSound(): void {
+  if (!_uiSoundsEnabled) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
 
-    // Ascending tones
     const frequencies = [200, 400, 600, 800];
     frequencies.forEach((freq, i) => {
       const osc = ctx.createOscillator();
@@ -197,10 +194,10 @@ export function playBootSound(): void {
       osc.start(startTime);
       osc.stop(startTime + 0.15);
     });
-    
+
     triggerHaptic("success");
   } catch {
-    // Silent fallback
+    // Silent
   }
 }
 
@@ -208,12 +205,12 @@ export function playBootSound(): void {
  * Plays a success/access-granted chime
  */
 export function playAccessGrantedSound(): void {
+  if (!_uiSoundsEnabled) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
 
-    // Two-note ascending chime
-    const notes = [523.25, 783.99]; // C5, G5
+    const notes = [523.25, 783.99];
     notes.forEach((freq, i) => {
       const osc = ctx.createOscillator();
       osc.type = "sine";
@@ -230,10 +227,70 @@ export function playAccessGrantedSound(): void {
       osc.start(startTime);
       osc.stop(startTime + 0.6);
     });
-    
+
     triggerHaptic("success");
   } catch {
-    // Silent fallback
+    // Silent
+  }
+}
+
+/**
+ * Start ambient system hum (40Hz low-frequency focus loop)
+ */
+export function startAmbientHum(): void {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    if (ambientOsc) return; // Already running
+
+    ambientOsc = ctx.createOscillator();
+    ambientOsc.type = "sine";
+    ambientOsc.frequency.setValueAtTime(40, ctx.currentTime);
+
+    ambientGain = ctx.createGain();
+    ambientGain.gain.setValueAtTime(0, ctx.currentTime);
+    ambientGain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 2); // Fade in
+
+    // Add a subtle second harmonic for richness
+    const osc2 = ctx.createOscillator();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(80, ctx.currentTime);
+    const gain2 = ctx.createGain();
+    gain2.gain.setValueAtTime(0, ctx.currentTime);
+    gain2.gain.linearRampToValueAtTime(0.015, ctx.currentTime + 2);
+
+    ambientOsc.connect(ambientGain);
+    ambientGain.connect(ctx.destination);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+
+    ambientOsc.start();
+    osc2.start();
+  } catch {
+    // Silent
+  }
+}
+
+/**
+ * Stop ambient system hum
+ */
+export function stopAmbientHum(): void {
+  try {
+    if (ambientGain) {
+      const ctx = getAudioContext();
+      if (ctx) {
+        ambientGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
+      }
+    }
+    setTimeout(() => {
+      if (ambientOsc) {
+        try { ambientOsc.stop(); } catch {}
+        ambientOsc = null;
+      }
+      ambientGain = null;
+    }, 1200);
+  } catch {
+    // Silent
   }
 }
 
@@ -242,12 +299,12 @@ export function playAccessGrantedSound(): void {
  */
 export function speakGreeting(text: string): Promise<void> {
   return new Promise((resolve) => {
+    if (!_aiVoiceEnabled) { resolve(); return; }
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
       resolve();
       return;
     }
 
-    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
@@ -255,7 +312,6 @@ export function speakGreeting(text: string): Promise<void> {
     utterance.pitch = 0.85;
     utterance.volume = 0.9;
 
-    // Try to get a female English voice
     const voices = window.speechSynthesis.getVoices();
     const preferred = voices.find(
       (v) =>
@@ -276,12 +332,10 @@ export function speakGreeting(text: string): Promise<void> {
     utterance.onend = () => resolve();
     utterance.onerror = () => resolve();
 
-    // Small delay to let audio context settle
     setTimeout(() => {
       window.speechSynthesis.speak(utterance);
     }, 300);
 
-    // Timeout fallback
     setTimeout(resolve, 8000);
   });
 }

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getBusinessWeek, saveBusinessWeek, getAllBusinessWeeks } from '@/lib/services/businessService';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const monday = searchParams.get('monday');
@@ -12,9 +14,10 @@ export async function GET(request: Request) {
     }
     const all = await getAllBusinessWeeks();
     return NextResponse.json(all);
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Business API GET Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -25,8 +28,9 @@ export async function POST(request: Request) {
     console.log("BODY:", data);
     const week = await saveBusinessWeek(data);
     return NextResponse.json(week);
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Business API POST Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -52,6 +52,12 @@ export interface CalendarLog {
   created_at?: string;
 }
 
+export interface AudioSettings {
+  ambientHum: boolean;
+  uiFeedbackSounds: boolean;
+  aiVoiceNarrator: boolean;
+}
+
 export interface AppSettings {
   password: string;
   animationsEnabled: boolean;
@@ -59,6 +65,7 @@ export interface AppSettings {
   startDate: string; // YYYY-MM-DD
   goalSales: number;
   goalDays: number;
+  audio: AudioSettings;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -68,4 +75,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
   startDate: "2026-04-01",
   goalSales: 300,
   goalDays: 30,
+  audio: {
+    ambientHum: false,
+    uiFeedbackSounds: true,
+    aiVoiceNarrator: true,
+  },
 };

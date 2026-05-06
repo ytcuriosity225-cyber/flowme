@@ -35,8 +35,10 @@ export default function Dashboard() {
       const techData = await techRes.json();
 
       const latestBus = busData.length > 0 ? (busData[0]?.is_success ? 100 : 0) : 0;
-      const avgStudy = studyData.length > 0 ? Math.round(studyData.reduce((a: any, b: any) => a + (b.score || 0), 0) / studyData.length) : 0;
-      const techCompletedCount = techData.filter((p: any) => p.is_completed).length;
+      const avgStudy = studyData.length > 0 
+        ? Math.round(studyData.reduce((a: number, b: { score?: number }) => a + (b.score || 0), 0) / studyData.length) 
+        : 0;
+      const techCompletedCount = techData.filter((p: { is_completed: boolean }) => p.is_completed).length;
       const techScore = Math.round((techCompletedCount / 13) * 100);
 
       setScores({

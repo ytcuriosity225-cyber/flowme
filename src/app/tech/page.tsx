@@ -67,7 +67,7 @@ export default function TechPage() {
   const [progress, setProgress] = useState<TechProgress[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<{ id: string, youtubeId: string, title: string, isCert: boolean } | null>(null);
   const [videoEnded, setVideoEnded] = useState(false);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YT.Player | null>(null);
 
   useEffect(() => {
     fetchProgress();
@@ -75,7 +75,7 @@ export default function TechPage() {
   }, []);
 
   function loadYouTubeAPI() {
-    if (!(window as any).YT) {
+    if (typeof window !== 'undefined' && !window.YT) {
       const tag = document.createElement('script');
       tag.src = "https://www.youtube.com/iframe_api";
       const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -94,18 +94,17 @@ export default function TechPage() {
   }
 
   useEffect(() => {
-    const win = window as any;
-    if (selectedVideo && selectedVideo.youtubeId && win.YT && win.YT.Player) {
+    if (selectedVideo && selectedVideo.youtubeId && typeof window !== 'undefined' && window.YT && window.YT.Player) {
       setVideoEnded(false);
       if (playerRef.current) playerRef.current.destroy();
-      playerRef.current = new win.YT.Player('youtube-player', {
+      playerRef.current = new window.YT.Player('youtube-player', {
         height: '100%',
         width: '100%',
         videoId: selectedVideo.youtubeId,
         playerVars: { 'autoplay': 1, 'controls': 1, 'rel': 0, 'modestbranding': 1 },
         events: {
-          'onStateChange': (event: any) => {
-            if (event.data === win.YT.PlayerState.ENDED) setVideoEnded(true);
+          'onStateChange': (event: YT.OnStateChangeEvent) => {
+            if (event.data === window.YT.PlayerState.ENDED) setVideoEnded(true);
           }
         }
       });

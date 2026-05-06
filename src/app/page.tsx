@@ -235,6 +235,7 @@ export default function LockScreen() {
           <NeuralFace
             isScanning={phase === "scanning" || phase === "decrypting"}
             isSuccess={phase === "granted"}
+            inputActive={phase === "idle" && password.length > 0}
           />
 
           {/* Scanning label */}
@@ -392,7 +393,7 @@ export default function LockScreen() {
 
             <button
               type="submit"
-              className="w-full py-4 text-[11px] font-bold tracking-[0.3em] uppercase rounded-sm transition-all cursor-pointer bg-transparent text-[var(--neon-primary)] border border-[var(--neon-border)] font-mono hover:bg-[var(--neon-dim)] hover:border-[var(--neon-primary)] hover:shadow-[0_0_15px_var(--neon-glow),_inset_0_0_15px_var(--neon-dim)]"
+              className="w-full py-4 text-[11px] font-bold tracking-[0.3em] uppercase rounded-sm transition-all cursor-pointer bg-transparent text-(--neon-primary) border border-(--neon-border) font-mono hover:bg-(--neon-dim) hover:border-(--neon-primary) hover:shadow-[0_0_15px_var(--neon-glow),inset_0_0_15px_var(--neon-dim)]"
               onMouseEnter={() => {
                 playBlip();
               }}

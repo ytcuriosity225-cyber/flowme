@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseClient';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   console.log("TEST DB ROUTE HIT");
   try {
@@ -29,8 +31,9 @@ export async function GET() {
 
     console.log("FORCED INSERT SUCCESS:", data);
     return NextResponse.json({ success: true, data });
-  } catch (err: any) {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
     console.error("TEST ROUTE CRASHED:", err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

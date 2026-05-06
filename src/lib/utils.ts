@@ -1,4 +1,4 @@
-const SETTINGS_KEY = "flowme_sales_settings";
+const SETTINGS_KEY = "neuroflow_os_settings";
 
 export function getStoredSettings() {
   if (typeof window === "undefined") return null;

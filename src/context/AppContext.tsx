@@ -28,7 +28,7 @@ interface AppContextType {
   setTheme: (theme: ThemeCode) => void;
 }
 
-const THEME_KEY = "flowme_theme";
+const THEME_KEY = "neuroflow_theme";
 
 const AppContext = createContext<AppContextType | null>(null);
 

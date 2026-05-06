@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getStudyWeek, saveStudyWeek, getAllStudyWeeks } from '@/lib/services/studyService';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const weekNumber = searchParams.get('week');
@@ -13,8 +15,9 @@ export async function GET(request: Request) {
     }
     const all = await getAllStudyWeeks(month);
     return NextResponse.json(all);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -25,7 +28,8 @@ export async function POST(request: Request) {
     console.log("BODY:", data);
     const week = await saveStudyWeek(data);
     return NextResponse.json(week);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
