@@ -32,7 +32,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Load settings
   useEffect(() => {
     const storedSettings = getStoredSettings();
-    if (storedSettings) setSettings(storedSettings);
+    if (storedSettings) {
+      setSettings({ ...DEFAULT_SETTINGS, ...storedSettings });
+    }
     setIsLoaded(true);
   }, []);
 

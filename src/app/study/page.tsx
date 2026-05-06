@@ -32,7 +32,12 @@ const MAY_STUDY_PLAN = [
 export default function StudyPage() {
   const { isUnlocked } = useApp();
   const [activeWeek, setActiveWeek] = useState(1);
-  const [weekData, setWeekData] = useState<StudyWeek | null>(null);
+  const [weekData, setWeekData] = useState<StudyWeek>({
+    week_number: 1,
+    month_name: 'May',
+    tasks: [],
+    score: 0
+  });
   const [loading, setLoading] = useState(true);
 
   const isMay = new Date().getMonth() === 4; // 0-indexed, May is 4
@@ -43,10 +48,11 @@ export default function StudyPage() {
   }, [activeWeek]);
 
   async function fetchWeekData() {
+    setLoading(true);
     try {
       const res = await fetch(`/api/study?week=${activeWeek}&month=May`);
       const data = await res.json();
-      if (data) {
+      if (data && data.tasks) {
         setWeekData(data);
       } else {
         // Initialize new week data
@@ -66,7 +72,7 @@ export default function StudyPage() {
   }
 
   async function toggleTask(taskId: string) {
-    if (!weekData) return;
+    if (!weekData || !weekData.tasks) return;
     const newTasks = weekData.tasks.map(t => t.id === taskId ? { ...t, completed: !t.completed } : t);
     const completedTasks = newTasks.filter(t => t.completed).length;
     const score = Math.round((completedTasks / newTasks.length) * 100);
@@ -99,7 +105,7 @@ export default function StudyPage() {
           <p className="text-text-muted font-mono text-sm mt-1">Status: Active (Month: May)</p>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-black text-white">{weekData?.score || 0}%</div>
+          <div className="text-5xl font-black text-white">{weekData.score || 0}%</div>
           <div className="text-xs uppercase font-bold text-blue-500">Weekly Score</div>
         </div>
       </header>
@@ -129,7 +135,7 @@ export default function StudyPage() {
         </h2>
 
         <div className="space-y-4">
-          {weekData?.tasks.map((task) => (
+          {weekData.tasks?.map((task) => (
             <div 
               key={task.id}
               onClick={() => toggleTask(task.id)}

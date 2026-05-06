@@ -27,7 +27,10 @@ export async function saveBusinessWeek(data: Omit<BusinessWeek, 'id' | 'created_
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Supabase error saving business week:', error);
+    throw error;
+  }
 
   // Update calendar logs
   await updateCalendarFromBusiness(week);

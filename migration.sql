@@ -47,12 +47,34 @@ CREATE TABLE IF NOT EXISTS calendar_logs (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable RLS (Optional but recommended)
--- ALTER TABLE business_weeks ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE study_weeks ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE tech_progress ENABLE ROW LEVEL SECURITY;
+-- Enable RLS
+ALTER TABLE business_weeks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE study_weeks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tech_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE calendar_logs ENABLE ROW LEVEL SECURITY;
 
--- 5. Helper Function for Atomic Calendar Updates
+-- 5. RLS Policies
+-- Business Weeks
+CREATE POLICY "Allow anonymous select on business_weeks" ON business_weeks FOR SELECT USING (true);
+CREATE POLICY "Allow anonymous insert on business_weeks" ON business_weeks FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anonymous update on business_weeks" ON business_weeks FOR UPDATE USING (true);
+
+-- Study Weeks
+CREATE POLICY "Allow anonymous select on study_weeks" ON study_weeks FOR SELECT USING (true);
+CREATE POLICY "Allow anonymous insert on study_weeks" ON study_weeks FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anonymous update on study_weeks" ON study_weeks FOR UPDATE USING (true);
+
+-- Tech Progress
+CREATE POLICY "Allow anonymous select on tech_progress" ON tech_progress FOR SELECT USING (true);
+CREATE POLICY "Allow anonymous insert on tech_progress" ON tech_progress FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anonymous update on tech_progress" ON tech_progress FOR UPDATE USING (true);
+
+-- Calendar Logs
+CREATE POLICY "Allow anonymous select on calendar_logs" ON calendar_logs FOR SELECT USING (true);
+CREATE POLICY "Allow anonymous insert on calendar_logs" ON calendar_logs FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow anonymous update on calendar_logs" ON calendar_logs FOR UPDATE USING (true);
+
+-- 6. Helper Function for Atomic Calendar Updates
 CREATE OR REPLACE FUNCTION update_calendar_log(
   p_date DATE,
   p_business_score INTEGER DEFAULT NULL,

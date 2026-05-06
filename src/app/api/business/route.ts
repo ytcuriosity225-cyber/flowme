@@ -13,6 +13,7 @@ export async function GET(request: Request) {
     const all = await getAllBusinessWeeks();
     return NextResponse.json(all);
   } catch (error: any) {
+    console.error('Business API GET Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
     const week = await saveBusinessWeek(data);
     return NextResponse.json(week);
   } catch (error: any) {
+    console.error('Business API POST Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
