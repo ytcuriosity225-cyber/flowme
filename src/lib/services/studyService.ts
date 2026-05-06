@@ -26,7 +26,10 @@ export async function saveStudyWeek(data: Omit<StudyWeek, 'id' | 'created_at'>):
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Supabase error saving study week:', error);
+    throw error;
+  }
 
   // Update calendar logs
   await updateCalendarFromStudy(week);

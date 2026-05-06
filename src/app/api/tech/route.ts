@@ -18,8 +18,11 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  console.log("API HIT: /api/tech POST");
   try {
-    const { phaseId, videoId, isCertification } = await request.json();
+    const data = await request.json();
+    console.log("BODY:", data);
+    const { phaseId, videoId, isCertification } = data;
     const progress = await markVideoComplete(phaseId, videoId, isCertification);
     return NextResponse.json(progress);
   } catch (error: any) {

@@ -26,7 +26,10 @@ export async function markVideoComplete(phaseId: number, videoId: string, isCert
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error('Supabase error saving tech progress:', error);
+    throw error;
+  }
 
   // Update calendar logs (maybe give a default score per video completion)
   await updateCalendarFromTech(progress);

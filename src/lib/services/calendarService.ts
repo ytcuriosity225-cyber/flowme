@@ -22,10 +22,11 @@ export async function updateCalendarFromBusiness(week: BusinessWeek) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
     const dateStr = d.toISOString().split('T')[0];
-    await supabaseAdmin.rpc('update_calendar_log', { 
+    const { error: rpcError } = await supabaseAdmin.rpc('update_calendar_log', { 
       p_date: dateStr, 
       p_business_score: score 
     });
+    if (rpcError) console.error(`RPC Error (Business) for ${dateStr}:`, rpcError);
   }
 }
 
@@ -47,18 +48,20 @@ export async function updateCalendarFromStudy(week: StudyWeek) {
 
   for (let d = range.start; d <= range.end; d++) {
     const dateStr = `2026-05-${d.toString().padStart(2, '0')}`;
-    await supabaseAdmin.rpc('update_calendar_log', { 
+    const { error: rpcError } = await supabaseAdmin.rpc('update_calendar_log', { 
       p_date: dateStr, 
       p_study_score: week.score 
     });
+    if (rpcError) console.error(`RPC Error (Study) for ${dateStr}:`, rpcError);
   }
 }
 
 export async function updateCalendarFromTech(progress: TechProgress) {
   const dateStr = new Date().toISOString().split('T')[0];
   // Calculate a "Tech Score" based on overall progress (placeholder)
-  await supabaseAdmin.rpc('update_calendar_log', { 
+  const { error: rpcError } = await supabaseAdmin.rpc('update_calendar_log', { 
     p_date: dateStr, 
     p_tech_score: 100 
   });
+  if (rpcError) console.error(`RPC Error (Tech) for ${dateStr}:`, rpcError);
 }

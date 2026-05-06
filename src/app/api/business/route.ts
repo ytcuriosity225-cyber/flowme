@@ -19,8 +19,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  console.log("API HIT: /api/business POST");
   try {
     const data = await request.json();
+    console.log("BODY:", data);
     const week = await saveBusinessWeek(data);
     return NextResponse.json(week);
   } catch (error: any) {
